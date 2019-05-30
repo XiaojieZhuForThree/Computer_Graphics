@@ -13,6 +13,7 @@ public class Tetris extends Frame {
 				System.exit(0);
 			}
 		});
+		add("Center", new getTetris());
 		setSize(600, 400);
 		setVisible(true);
 	}
@@ -28,5 +29,8 @@ class getTetris extends Canvas {
 		minMaxXY = Math.min(maxX, maxY);
 		xCenter = maxX / 2;
 		yCenter = maxY / 2;
+	}
+	public void paint(Graphics g) {
+		g.drawRect(50, 50, 200, 400);
 	}
 }
