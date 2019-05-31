@@ -95,12 +95,12 @@ class getTetris extends Canvas {
 	}
 
 	void drawWedge(Graphics g, int x, int y, int square) {
-		int[][] vertex = new int[4][2];
-		vertex[0] = new int[] { x, y };
-		vertex[1] = new int[] { x + square, y };
-		vertex[2] = new int[] { x + square, y - square };
-		vertex[3] = new int[] { x + 2 * square, y - square };
-		for (int[] coord : vertex) {
+		int[][] vertices = new int[4][2];
+		vertices[0] = new int[] { x, y };
+		vertices[1] = new int[] { x + square, y };
+		vertices[2] = new int[] { x + square, y - square };
+		vertices[3] = new int[] { x + 2 * square, y - square };
+		for (int[] coord : vertices) {
 			int X = coord[0];
 			int Y = coord[1];
 			g.setColor(Color.yellow);
@@ -112,12 +112,12 @@ class getTetris extends Canvas {
 	}
 
 	void drawL(Graphics g, int x, int y, int square) {
-		int[][] vertex = new int[4][2];
-		vertex[0] = new int[] { x, y };
-		vertex[1] = new int[] { x + square, y };
-		vertex[2] = new int[] { x + square, y - square };
-		vertex[3] = new int[] { x + square, y - 2 * square };
-		for (int[] coord : vertex) {
+		int[][] vertices = new int[4][2];
+		vertices[0] = new int[] { x, y };
+		vertices[1] = new int[] { x + square, y };
+		vertices[2] = new int[] { x + square, y - square };
+		vertices[3] = new int[] { x + square, y - 2 * square };
+		for (int[] coord : vertices) {
 			int X = coord[0];
 			int Y = coord[1];
 			g.setColor(Color.blue);
@@ -129,12 +129,12 @@ class getTetris extends Canvas {
 	}
 
 	void drawReverseL(Graphics g, int x, int y, int square) {
-		int[][] vertex = new int[4][2];
-		vertex[0] = new int[] { x, y };
-		vertex[1] = new int[] { x + square, y };
-		vertex[2] = new int[] { x + 2 * square, y };
-		vertex[3] = new int[] { x + 2 * square, y - square };
-		for (int[] coord : vertex) {
+		int[][] vertices = new int[4][2];
+		vertices[0] = new int[] { x, y };
+		vertices[1] = new int[] { x + square, y };
+		vertices[2] = new int[] { x + 2 * square, y };
+		vertices[3] = new int[] { x + 2 * square, y - square };
+		for (int[] coord : vertices) {
 			int X = coord[0];
 			int Y = coord[1];
 			g.setColor(Color.red);
@@ -146,12 +146,12 @@ class getTetris extends Canvas {
 	}
 
 	void drawSquare(Graphics g, int x, int y, int square) {
-		int[][] vertex = new int[4][2];
-		vertex[0] = new int[] { x, y };
-		vertex[1] = new int[] { x + square, y };
-		vertex[2] = new int[] { x + square, y - square };
-		vertex[3] = new int[] { x, y - square };
-		for (int[] coord : vertex) {
+		int[][] vertices = new int[4][2];
+		vertices[0] = new int[] { x, y };
+		vertices[1] = new int[] { x + square, y };
+		vertices[2] = new int[] { x + square, y - square };
+		vertices[3] = new int[] { x, y - square };
+		for (int[] coord : vertices) {
 			int X = coord[0];
 			int Y = coord[1];
 			g.setColor(Color.green);
