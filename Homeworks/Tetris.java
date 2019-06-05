@@ -14,7 +14,7 @@ public class Tetris extends Frame {
 			}
 		});
 		add("Center", new getTetris());
-		setSize(600, 400);
+		setSize(800, 800);
 		setVisible(true);
 	}
 }
