@@ -45,9 +45,9 @@ class getTetris extends Canvas {
 	
 	getTetris() {
 		addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent evt) {
-				mouse1x = evt.getX();
-				mouse1y = evt.getY();
+			public void mousePressed(MouseEvent event) {
+				mouse1x = event.getX();
+				mouse1y = event.getY();
 				if ((mouse1x < iX(xK + square * 4)) && (mouse1x > iX(xK)) && (mouse1y < iY(yK - square * (float) 1.5))
 						&& (mouse1y > iY(yK))) {
 					System.exit(0);
@@ -56,9 +56,9 @@ class getTetris extends Canvas {
 		});
 
 		addMouseMotionListener(new MouseAdapter() {
-			public void mouseMoved(MouseEvent evtM) {
-				mouse2x = evtM.getX();
-				mouse2y = evtM.getY();
+			public void mouseMoved(MouseEvent event) {
+				mouse2x = event.getX();
+				mouse2y = event.getY();
 				if ((mouse2x < iX(xA + square * 10)) && (mouse2x > iX(xA)) && (mouse2y < iY(yA - square * 20)) && (mouse2y > iY(yA))) {
 					show = true;
 					repaint();
