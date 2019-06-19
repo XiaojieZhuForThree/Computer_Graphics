@@ -49,18 +49,18 @@ class getTetris2 extends Canvas {
 
 	// to determine the coordinates for the cursor
 	int mouse1x, mouse1y, mouse2x, mouse2y;
-	
+
 	int count = 0;
 
 	// random number generator
 	Random rand = new Random();
 
-	// Obtain a number between [0 - 5].
-	int n1 = rand.nextInt(6);
-	int n2 = rand.nextInt(6);
-	
+	// Obtain a number between [0 - 6].
+	int n1 = rand.nextInt(7);
+	int n2 = rand.nextInt(7);
+
 	int delay = 1000;
-	
+
 	Timer timer = new Timer(delay, new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -68,9 +68,14 @@ class getTetris2 extends Canvas {
 			if (yDraw > bottomLine && show == false) {
 				count += 1;
 				repaint();
+			} else if (yDraw <= bottomLine) {
+				n1 = n2;
+				n2 = rand.nextInt(7);
+				count = 0;
+				repaint();
 			}
-			
-		}		
+
+		}
 	});
 
 	// initialization function to get the initial value and center for the frame
@@ -224,7 +229,7 @@ class getTetris2 extends Canvas {
 
 	void drawBlueReverseL(Graphics g, int x, int y, int square) {
 		int[][] vertices = new int[4][2];
-		vertices[0] = new int[] { x, y - square};
+		vertices[0] = new int[] { x, y - square };
 		vertices[1] = new int[] { x, y };
 		vertices[2] = new int[] { x + square, y };
 		vertices[3] = new int[] { x + 2 * square, y };
@@ -309,15 +314,17 @@ class getTetris2 extends Canvas {
 
 	void drawMoveShapes(Graphics g) {
 		if (n1 == 0) {
-			drawYellowWedge(g, iX(xDraw - square), iY(yDraw), (int) square);
+			drawYellowWedge(g, iX(xDraw - 1.5F * square), iY(yDraw), (int) square);
 		} else if (n1 == 1) {
-			drawPurpleReverseWedge(g, iX(xDraw), iY(yDraw), (int) square);
+			drawPurpleReverseWedge(g, iX(xDraw - 0.5F * square), iY(yDraw), (int) square);
 		} else if (n1 == 2) {
-			drawBlueReverseL(g, iX(xDraw - square), iY(yDraw), (int) square);
+			drawBlueReverseL(g, iX(xDraw - 1.5F * square), iY(yDraw), (int) square);
 		} else if (n1 == 3) {
-			drawRedReverseL(g, iX(xDraw - square), iY(yDraw), (int) square);
+			drawRedReverseL(g, iX(xDraw - 1.5F * square), iY(yDraw), (int) square);
 		} else if (n1 == 4) {
 			drawGreenCube(g, iX(xDraw - square), iY(yDraw), (int) square);
+		} else if (n1 == 5) {
+			drawOrangeHill(g, iX(xDraw - 1.5F * square), iY(yDraw), (int) square);
 		} else {
 			drawCyanBar(g, iX(xDraw - 2 * square), iY(yDraw), (int) square);
 		}
@@ -327,13 +334,15 @@ class getTetris2 extends Canvas {
 		if (n2 == 0) {
 			drawYellowWedge(g, iX(xB + square), iY(yB - 1.5F * square), (int) square);
 		} else if (n2 == 1) {
-			drawPurpleReverseWedge(g, iX(xB + square), iY(yB - 0.5F * square), (int) square);
+			drawPurpleReverseWedge(g, iX(xB + 2F * square), iY(yB - 1.5F * square), (int) square);
 		} else if (n2 == 2) {
-			drawBlueReverseL(g, iX(xB + square), iY(yB - 0.5F * square), (int) square);
+			drawBlueReverseL(g, iX(xB + square), iY(yB - 1.5F * square), (int) square);
 		} else if (n2 == 3) {
 			drawRedReverseL(g, iX(xB + square), iY(yB - 1.5F * square), (int) square);
 		} else if (n2 == 4) {
 			drawGreenCube(g, iX(xB + 1.5F * square), iY(yB - 1.5F * square), (int) square);
+		} else if (n2 == 5) {
+			drawOrangeHill(g, iX(xB + square), iY(yB - 1.5F * square), (int) square);
 		} else {
 			drawCyanBar(g, iX(xB + 0.5F * square), iY(yB - square), (int) square);
 		}
