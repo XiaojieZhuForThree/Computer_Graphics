@@ -46,7 +46,7 @@ class getTetris2 extends Canvas {
 	float xH, yH, xI, yI, xJ, yJ, xK, yK, xL, yL, xM, yM;
 	float xDraw, yDraw;
 	float testYDraw, bottomLine;
-
+	int leftMove = 0;
 	// to determine the coordinates for the cursor
 	int mouse1x, mouse1y, mouse2x, mouse2y;
 
@@ -72,6 +72,7 @@ class getTetris2 extends Canvas {
 				n1 = n2;
 				n2 = rand.nextInt(7);
 				count = 0;
+				leftMove = 0;
 				repaint();
 			}
 
@@ -108,7 +109,18 @@ class getTetris2 extends Canvas {
 				}
 			}
 		});
-
+		
+		addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent event) {
+				if (event.getButton() == MouseEvent.BUTTON1) {
+					leftMove ++;					
+				}
+				else if (event.getButton() == MouseEvent.BUTTON3) {
+					leftMove --;
+				}
+			}
+		});
+		
 		// use the mouseMotionListener to implement the function to show the PAUSE
 		// button
 		addMouseMotionListener(new MouseAdapter() {
@@ -160,7 +172,7 @@ class getTetris2 extends Canvas {
 		xL = (float) (xK + 0.9 * square);
 		yL = (float) (yK - 1.1 * square);
 		bottomLine = yCenter - 9 * square;
-		xDraw = xCenter;
+		xDraw = xCenter - leftMove * square;
 		yDraw = yCenter + (9 - count) * square;
 		// coordinates for the draw place
 
