@@ -10,9 +10,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Random;
+import java.util.*;
 
 import javax.swing.Timer;
 
@@ -29,6 +30,7 @@ public class Tetris_2 extends Frame {
 				System.exit(0);
 			}
 		});
+
 		add("Center", new getTetris2());
 		setSize(800, 600);
 		setVisible(true);
@@ -47,10 +49,12 @@ class getTetris2 extends Canvas {
 	float xDraw, yDraw;
 	float testYDraw, bottomLine;
 	int leftMove = 0;
+	int count = 0;
+	int rotate = 0;
 	// to determine the coordinates for the cursor
 	int mouse1x, mouse1y, mouse2x, mouse2y;
 
-	int count = 0;
+	List<int[]> prevDraws = new ArrayList<>();
 
 	// random number generator
 	Random rand = new Random();
@@ -69,13 +73,14 @@ class getTetris2 extends Canvas {
 				count += 1;
 				repaint();
 			} else if (yDraw <= bottomLine) {
+				prevDraws.add(new int[] { n1, count, leftMove, rotate });
 				n1 = n2;
 				n2 = rand.nextInt(7);
 				count = 0;
 				leftMove = 0;
+				rotate = 0;
 				repaint();
 			}
-
 		}
 	});
 
@@ -108,19 +113,30 @@ class getTetris2 extends Canvas {
 					System.exit(0);
 				}
 			}
-		});
-		
-		addMouseListener(new MouseAdapter() {
+
 			public void mouseClicked(MouseEvent event) {
-				if (event.getButton() == MouseEvent.BUTTON1) {
-					leftMove ++;					
-				}
-				else if (event.getButton() == MouseEvent.BUTTON3) {
-					leftMove --;
+				if (event.getButton() == MouseEvent.BUTTON1 && show == false) {
+					leftMove++;
+					repaint();
+				} else if (event.getButton() == MouseEvent.BUTTON3 && show == false) {
+					leftMove--;
+					repaint();
 				}
 			}
 		});
-		
+
+		addMouseWheelListener(new MouseAdapter() {
+			public void mouseWheelMoved(MouseWheelEvent event) {
+				if (event.getWheelRotation() < 0 && !show) {
+					rotate = (rotate + 1) % 4;
+					repaint();
+				} else if (event.getWheelRotation() > 0 && !show){
+					rotate = (rotate - 1) % 4;
+					repaint();
+				}
+			}
+		});
+
 		// use the mouseMotionListener to implement the function to show the PAUSE
 		// button
 		addMouseMotionListener(new MouseAdapter() {
@@ -200,18 +216,32 @@ class getTetris2 extends Canvas {
 			g.drawString("PAUSE", iX(xM), iY(yM));
 		}
 		// draw the shapes
-		drawMoveShapes(g);
-		drawStableShapes(g);
+		for (int[] info : prevDraws) {
+			int n = info[0];
+			int oldCount = info[1];
+			int oldLeftMove = info[2];
+			int oldRotate = info[3];
+			drawMoveShapes(g, n, xCenter - oldLeftMove * square, yCenter + (9 - oldCount) * square, oldRotate);
+		}
+		drawMoveShapes(g, n1, xDraw, yDraw, rotate);
+		drawStableShapes(g, n2);
 
 	}
 
 	// functions to draw all the shapes
-	void drawYellowWedge(Graphics g, int x, int y, int square) {
+	void drawYellowWedge(Graphics g, int x, int y, int square, int rotate) {
 		int[][] vertices = new int[4][2];
-		vertices[0] = new int[] { x, y };
-		vertices[1] = new int[] { x + square, y };
-		vertices[2] = new int[] { x + square, y - square };
-		vertices[3] = new int[] { x + 2 * square, y - square };
+		if (rotate == 0 || rotate == 2 || rotate == -2) {
+			vertices[0] = new int[] { x, y };
+			vertices[1] = new int[] { x + square, y };
+			vertices[2] = new int[] { x + square, y - square };
+			vertices[3] = new int[] { x + 2 * square, y - square };
+		} else if (rotate == 1 || rotate == 3 || rotate == -3 || rotate == -1) {
+			vertices[0] = new int[] { x + square, y };
+			vertices[1] = new int[] { x + square, y - square };
+			vertices[2] = new int[] { x, y - square };
+			vertices[3] = new int[] { x, y - 2 * square };
+		}
 		for (int[] coord : vertices) {
 			int X = coord[0];
 			int Y = coord[1];
@@ -223,12 +253,19 @@ class getTetris2 extends Canvas {
 		}
 	}
 
-	void drawPurpleReverseWedge(Graphics g, int x, int y, int square) {
+	void drawPurpleReverseWedge(Graphics g, int x, int y, int square, int rotate) {
 		int[][] vertices = new int[4][2];
-		vertices[0] = new int[] { x, y };
-		vertices[1] = new int[] { x + square, y };
-		vertices[2] = new int[] { x, y - square };
-		vertices[3] = new int[] { x - square, y - square };
+		if (rotate == 0 || rotate == 2 || rotate == -2) {
+			vertices[0] = new int[] { x, y };
+			vertices[1] = new int[] { x + square, y };
+			vertices[2] = new int[] { x, y - square };
+			vertices[3] = new int[] { x - square, y - square };
+		} else if (rotate == 1 || rotate == 3 || rotate == -3 || rotate == -1) {
+			vertices[0] = new int[] { x, y };
+			vertices[1] = new int[] { x, y - square };
+			vertices[2] = new int[] { x + square, y - square };
+			vertices[3] = new int[] { x + square, y - 2 * square };
+		}
 		for (int[] coord : vertices) {
 			int X = coord[0];
 			int Y = coord[1];
@@ -239,12 +276,29 @@ class getTetris2 extends Canvas {
 		}
 	}
 
-	void drawBlueReverseL(Graphics g, int x, int y, int square) {
+	void drawBlueReverseL(Graphics g, int x, int y, int square, int rotate) {
 		int[][] vertices = new int[4][2];
-		vertices[0] = new int[] { x, y - square };
-		vertices[1] = new int[] { x, y };
-		vertices[2] = new int[] { x + square, y };
-		vertices[3] = new int[] { x + 2 * square, y };
+		if (rotate == 0) {
+			vertices[0] = new int[] { x, y - square };
+			vertices[1] = new int[] { x, y };
+			vertices[2] = new int[] { x + square, y };
+			vertices[3] = new int[] { x + 2 * square, y };
+		} else if (rotate == 1 || rotate == -3) {
+			vertices[0] = new int[] { x, y };
+			vertices[1] = new int[] { x, y - square };
+			vertices[2] = new int[] { x, y - 2 * square };
+			vertices[3] = new int[] { x + square, y - 2 * square };
+		} else if (rotate == 2 || rotate == -2) {
+			vertices[0] = new int[] { x + 2 * square, y };
+			vertices[1] = new int[] { x + 2 * square, y - square };
+			vertices[2] = new int[] { x + square, y - square };
+			vertices[3] = new int[] { x, y - square };
+		} else if (rotate == 3 || rotate == -1) {
+			vertices[0] = new int[] { x, y };
+			vertices[1] = new int[] { x + square, y };
+			vertices[2] = new int[] { x + square, y - square };
+			vertices[3] = new int[] { x + square, y - 2 * square };
+		}
 		for (int[] coord : vertices) {
 			int X = coord[0];
 			int Y = coord[1];
@@ -256,12 +310,30 @@ class getTetris2 extends Canvas {
 		}
 	}
 
-	void drawRedReverseL(Graphics g, int x, int y, int square) {
+	void drawRedReverseL(Graphics g, int x, int y, int square, int rotate) {
 		int[][] vertices = new int[4][2];
-		vertices[0] = new int[] { x, y };
-		vertices[1] = new int[] { x + square, y };
-		vertices[2] = new int[] { x + 2 * square, y };
-		vertices[3] = new int[] { x + 2 * square, y - square };
+		if (rotate == 0) {
+			vertices[0] = new int[] { x, y };
+			vertices[1] = new int[] { x + square, y };
+			vertices[2] = new int[] { x + 2 * square, y };
+			vertices[3] = new int[] { x + 2 * square, y - square };
+		} else if (rotate == 1 || rotate == -3) {
+			vertices[0] = new int[] { x, y };
+			vertices[1] = new int[] { x + square, y };
+			vertices[2] = new int[] { x, y - square };
+			vertices[3] = new int[] { x, y - 2 * square };
+		} else if (rotate == 2 || rotate == -2) {
+			vertices[0] = new int[] { x, y };
+			vertices[1] = new int[] { x, y - square };
+			vertices[2] = new int[] { x + square, y - square };
+			vertices[3] = new int[] { x + 2 * square, y - square };
+		} else if (rotate == 3 || rotate == -1) {
+			vertices[0] = new int[] { x + square, y };
+			vertices[1] = new int[] { x + square, y - square };
+			vertices[2] = new int[] { x + square, y - 2 * square };
+			vertices[3] = new int[] { x, y - 2 * square };
+		}
+
 		for (int[] coord : vertices) {
 			int X = coord[0];
 			int Y = coord[1];
@@ -273,7 +345,7 @@ class getTetris2 extends Canvas {
 		}
 	}
 
-	void drawGreenCube(Graphics g, int x, int y, int square) {
+	void drawGreenCube(Graphics g, int x, int y, int square, int rotate) {
 		int[][] vertices = new int[4][2];
 		vertices[0] = new int[] { x, y };
 		vertices[1] = new int[] { x + square, y };
@@ -290,12 +362,30 @@ class getTetris2 extends Canvas {
 		}
 	}
 
-	void drawOrangeHill(Graphics g, int x, int y, int square) {
+	void drawOrangeHill(Graphics g, int x, int y, int square, int rotate) {
 		int[][] vertices = new int[4][2];
-		vertices[0] = new int[] { x, y };
-		vertices[1] = new int[] { x + square, y };
-		vertices[2] = new int[] { x + square, y - square };
-		vertices[3] = new int[] { x + 2 * square, y };
+		if (rotate == 0) {
+			vertices[0] = new int[] { x, y };
+			vertices[1] = new int[] { x + square, y };
+			vertices[2] = new int[] { x + square, y - square };
+			vertices[3] = new int[] { x + 2 * square, y };
+		} else if (rotate == 1 || rotate == -3) {
+			vertices[0] = new int[] { x, y };
+			vertices[1] = new int[] { x, y - square };
+			vertices[2] = new int[] { x + square, y - square };
+			vertices[3] = new int[] { x, y - 2 * square };
+		} else if (rotate == 2 || rotate == -2) {
+			vertices[0] = new int[] { x + square, y };
+			vertices[1] = new int[] { x + square, y - square };
+			vertices[2] = new int[] { x, y - square };
+			vertices[3] = new int[] { x + 2 * square, y - square };
+		} else if (rotate == 3 || rotate == -1) {
+			vertices[0] = new int[] { x + square, y };
+			vertices[1] = new int[] { x + square, y - square };
+			vertices[2] = new int[] { x, y - square };
+			vertices[3] = new int[] { x + square, y - 2 * square };
+		}
+
 		for (int[] coord : vertices) {
 			int X = coord[0];
 			int Y = coord[1];
@@ -307,12 +397,19 @@ class getTetris2 extends Canvas {
 		}
 	}
 
-	void drawCyanBar(Graphics g, int x, int y, int square) {
+	void drawCyanBar(Graphics g, int x, int y, int square, int rotate) {
 		int[][] vertices = new int[4][2];
-		vertices[0] = new int[] { x, y };
-		vertices[1] = new int[] { x + square, y };
-		vertices[2] = new int[] { x + 2 * square, y };
-		vertices[3] = new int[] { x + 3 * square, y };
+		if (rotate == 0 || rotate == 2 || rotate == -2) {
+			vertices[0] = new int[] { x, y };
+			vertices[1] = new int[] { x + square, y };
+			vertices[2] = new int[] { x + 2 * square, y };
+			vertices[3] = new int[] { x + 3 * square, y };
+		} else if (rotate == 1 || rotate == 3 || rotate == -1 || rotate == -3) {
+			vertices[0] = new int[] { x + 2 * square, y };
+			vertices[1] = new int[] { x + 2 * square, y - square };
+			vertices[2] = new int[] { x + 2 * square, y - 2 * square };
+			vertices[3] = new int[] { x + 2 * square, y - 3 * square };
+		}
 		for (int[] coord : vertices) {
 			int X = coord[0];
 			int Y = coord[1];
@@ -324,39 +421,39 @@ class getTetris2 extends Canvas {
 		}
 	}
 
-	void drawMoveShapes(Graphics g) {
+	void drawMoveShapes(Graphics g, int n1, float xDraw, float yDraw, int rotate) {
 		if (n1 == 0) {
-			drawYellowWedge(g, iX(xDraw - 1.5F * square), iY(yDraw), (int) square);
+			drawYellowWedge(g, iX(xDraw - 1.5F * square), iY(yDraw), (int) square, rotate);
 		} else if (n1 == 1) {
-			drawPurpleReverseWedge(g, iX(xDraw - 0.5F * square), iY(yDraw), (int) square);
+			drawPurpleReverseWedge(g, iX(xDraw - 0.5F * square), iY(yDraw), (int) square, rotate);
 		} else if (n1 == 2) {
-			drawBlueReverseL(g, iX(xDraw - 1.5F * square), iY(yDraw), (int) square);
+			drawBlueReverseL(g, iX(xDraw - 1.5F * square), iY(yDraw), (int) square, rotate);
 		} else if (n1 == 3) {
-			drawRedReverseL(g, iX(xDraw - 1.5F * square), iY(yDraw), (int) square);
+			drawRedReverseL(g, iX(xDraw - 1.5F * square), iY(yDraw), (int) square, rotate);
 		} else if (n1 == 4) {
-			drawGreenCube(g, iX(xDraw - square), iY(yDraw), (int) square);
+			drawGreenCube(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
 		} else if (n1 == 5) {
-			drawOrangeHill(g, iX(xDraw - 1.5F * square), iY(yDraw), (int) square);
+			drawOrangeHill(g, iX(xDraw - 1.5F * square), iY(yDraw), (int) square, rotate);
 		} else {
-			drawCyanBar(g, iX(xDraw - 2 * square), iY(yDraw), (int) square);
+			drawCyanBar(g, iX(xDraw - 2 * square), iY(yDraw), (int) square, rotate);
 		}
 	}
 
-	void drawStableShapes(Graphics g) {
+	void drawStableShapes(Graphics g, int n2) {
 		if (n2 == 0) {
-			drawYellowWedge(g, iX(xB + square), iY(yB - 1.5F * square), (int) square);
+			drawYellowWedge(g, iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
 		} else if (n2 == 1) {
-			drawPurpleReverseWedge(g, iX(xB + 2F * square), iY(yB - 1.5F * square), (int) square);
+			drawPurpleReverseWedge(g, iX(xB + 2F * square), iY(yB - 1.5F * square), (int) square, 0);
 		} else if (n2 == 2) {
-			drawBlueReverseL(g, iX(xB + square), iY(yB - 1.5F * square), (int) square);
+			drawBlueReverseL(g, iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
 		} else if (n2 == 3) {
-			drawRedReverseL(g, iX(xB + square), iY(yB - 1.5F * square), (int) square);
+			drawRedReverseL(g, iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
 		} else if (n2 == 4) {
-			drawGreenCube(g, iX(xB + 1.5F * square), iY(yB - 1.5F * square), (int) square);
+			drawGreenCube(g, iX(xB + 1.5F * square), iY(yB - 1.5F * square), (int) square, 0);
 		} else if (n2 == 5) {
-			drawOrangeHill(g, iX(xB + square), iY(yB - 1.5F * square), (int) square);
+			drawOrangeHill(g, iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
 		} else {
-			drawCyanBar(g, iX(xB + 0.5F * square), iY(yB - square), (int) square);
+			drawCyanBar(g, iX(xB + 0.5F * square), iY(yB - square), (int) square, 0);
 		}
 	}
 }
