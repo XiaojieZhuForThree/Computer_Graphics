@@ -249,12 +249,14 @@ class getTetris2 extends Canvas {
 //
 //			break;
 //		}
-		if (xMax + square > xCenter + square * 5) {
-			leftMove++;
-		} else if (xMin - square <= xCenter - square * 5) {
-			leftMove--;
-		}
 		xDraw = xCenter - leftMove * square;
+		if (xMax > xCenter + 4 * square) {
+			xDraw -= square;
+			leftMove ++;
+		} else if (xMin < xCenter - 5 * square) {
+			xDraw += square;
+			leftMove --;
+		}
 		yDraw = yCenter + (9 - count) * square;
 		// coordinates for the draw place
 
