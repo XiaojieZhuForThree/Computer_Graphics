@@ -53,8 +53,8 @@ class getTetris2 extends Canvas {
 	int rotate = 0;
 	// to determine the coordinates for the cursor
 	int mouse1x, mouse1y, mouse2x, mouse2y;
-	List<int[]> stopZone = new ArrayList<>();
 	List<int[]> prevDraws = new ArrayList<>();
+	Set<int[]> prevSquares = new HashSet<>();
 	int[][] vertices = new int[4][2];
 	// random number generator
 	Random rand = new Random();
@@ -62,17 +62,30 @@ class getTetris2 extends Canvas {
 	// Obtain a number between [0 - 6].
 	int n1 = rand.nextInt(7);
 	int n2 = rand.nextInt(7);
-
 	int delay = 1000;
 
-	Timer timer = new Timer(delay, new ActionListener() {
+	Timer timer = new Timer(200, new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
-			if (((n1 == 6 && yDraw > bottomLine - square) || (n1 != 6 && yDraw > bottomLine)) && show == false) {
+			boolean coincidence = false;
+			for (int[] coord : vertices) {
+				for (int[] prevs : prevSquares) {
+					if ((coord[0] == prevs[0]) && (coord[1] + (int) square) == prevs[1]) {
+						coincidence = true;
+						break;
+					}
+				}
+			}
+			System.out.println(coincidence);
+			if (((n1 == 6 && yDraw > bottomLine - square) || (n1 != 6 && yDraw > bottomLine)) && !coincidence
+					&& !show) {
 				count += 1;
 				repaint();
-			} else if (yDraw <= bottomLine && show == false) {
+			} else if ((coincidence || yDraw <= bottomLine) && !show) {
+				for (int[] vertex : vertices) {
+					prevSquares.add(new int[] { vertex[0], vertex[1] });
+				}
 				prevDraws.add(new int[] { n1, count, leftMove, rotate });
 				n1 = n2;
 				n2 = rand.nextInt(7);
@@ -158,7 +171,7 @@ class getTetris2 extends Canvas {
 	public void paint(Graphics g) {
 		timer.start();
 		initgr();
-
+		vertices = new int[4][2];
 		square = (float) (minMaxXY / 30); // customarily set the length to be the minMaxXY / 30
 
 		// coordinates for the main area
@@ -393,10 +406,10 @@ class getTetris2 extends Canvas {
 
 	void drawCyanBar(Graphics g, int x, int y, int square, int rotate) {
 		if (rotate == 0 || rotate == 2 || rotate == -2) {
-			vertices[0] = new int[] { x, y};
+			vertices[0] = new int[] { x, y };
 			vertices[1] = new int[] { x + square, y };
-			vertices[2] = new int[] { x + 2 * square, y};
-			vertices[3] = new int[] { x + 3 * square, y};
+			vertices[2] = new int[] { x + 2 * square, y };
+			vertices[3] = new int[] { x + 3 * square, y };
 		} else if (rotate == 1 || rotate == 3 || rotate == -1 || rotate == -3) {
 			vertices[0] = new int[] { x + square, y };
 			vertices[1] = new int[] { x + square, y - square };
