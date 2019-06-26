@@ -56,14 +56,13 @@ class getTetris2 extends Canvas {
 	int mouse1x, mouse1y, mouse2x, mouse2y;
 	Set<int[]> prevDraws = new HashSet<>();
 	Set<int[]> prevSquares;
-	int[][] vertices = new int[4][2];
 	// random number generator
 	Random rand = new Random();
 
 	// Obtain a number between [0 - 6].
 	int n1 = rand.nextInt(7);
 	int n2 = rand.nextInt(7);
-	int delay = 1000;
+	int delay = 700;
 	int xMin, xMax, yMin, yMax;
 	int[][] nextCoord = new int[4][2];
 
@@ -73,11 +72,10 @@ class getTetris2 extends Canvas {
 			// TODO Auto-generated method stub
 			checkValid(n1, xDraw, yDraw - square, rotate);
 			boolean coincidence = checkCoincidence(nextCoord, prevSquares);
-			if (((n1 == 6 && yDraw > bottomLine - square) || (n1 != 6 && yDraw > bottomLine)) && !coincidence
-					&& !show) {
+			if (!coincidence && checkInside() && !show) {
 				count += 1;
 				repaint();
-			} else if ((coincidence || yDraw <= bottomLine) && !show) {
+			} else if ((coincidence || !checkInside()) && !show) {
 				prevDraws.add(new int[] { n1, count, leftMove, rotate });
 				n1 = n2;
 				n2 = rand.nextInt(7);
@@ -122,13 +120,13 @@ class getTetris2 extends Canvas {
 			public void mouseClicked(MouseEvent event) {
 				if (event.getButton() == MouseEvent.BUTTON1 && show == false) {
 					checkValid(n1, xDraw - square, yDraw, rotate);
-					if (!checkCoincidence(nextCoord, prevSquares)) {
+					if (!checkCoincidence(nextCoord, prevSquares) && checkInside()) {
 						leftMove++;
 						repaint();
 					}
 				} else if (event.getButton() == MouseEvent.BUTTON3 && show == false) {
 					checkValid(n1, xDraw + square, yDraw, rotate);
-					if (!checkCoincidence(nextCoord, prevSquares)) {
+					if (!checkCoincidence(nextCoord, prevSquares) && checkInside()) {
 						leftMove--;
 						repaint();
 					}
@@ -209,14 +207,6 @@ class getTetris2 extends Canvas {
 		bottomLine = yCenter - 9 * square;
 
 		xDraw = xCenter - leftMove * square;
-		checkValid(n1, xDraw, yDraw, rotate);
-		if (xMax > xCenter + 4 * square) {
-			xDraw -= square;
-			leftMove++;
-		} else if (xMin < xCenter - 5 * square) {
-			xDraw += square;
-			leftMove--;
-		}
 		yDraw = yCenter + (9 - count) * square;
 		// coordinates for the draw place
 
@@ -235,15 +225,7 @@ class getTetris2 extends Canvas {
 		g.setFont(f);
 		g.drawString("Score:      0", iX(xJ), iY(yJ));
 
-		// draw the pause button, determined by the value of show
-		if (show) {
-			g.setColor(Color.BLUE);
-			g.drawRect(iX(xC), iY(yC), (int) (square * 5), (int) (square * 2));
-			f = new Font("Dialog", Font.BOLD, (int) (square));
-			g.setColor(Color.BLUE);
-			g.drawString("PAUSE", iX(xM), iY(yM));
-		}
-		// draw the shapes
+		// draw the previous staying shapes
 		for (int[] info : prevDraws) {
 			int n = info[0];
 			int oldCount = info[1];
@@ -252,10 +234,23 @@ class getTetris2 extends Canvas {
 			drawMoveShapes(g, n, xCenter - oldLeftMove * square, yCenter + (9 - oldCount) * square, oldRotate);
 			leaveMarks();
 		}
+		//draw the shape at the next box
 		drawStableShapes(g, n2);
+		// draw the current falling shape
 		drawMoveShapes(g, n1, xDraw, yDraw, rotate);
+		
+		// draw the pause button, determined by the value of show
+		if (show) {
+			g.setColor(Color.BLUE);
+			g.drawRect(iX(xC), iY(yC), (int) (square * 5), (int) (square * 2));
+			f = new Font("Dialog", Font.BOLD, (int) (square));
+			g.setColor(Color.BLUE);
+			g.drawString("PAUSE", iX(xM), iY(yM));
+		}
 	}
-
+	
+	// function to get the coordinates and boundary values of the next possible move of the shapes
+	// the data are stored in the global array and variables
 	void checkValid(int n1, float xDraw, float yDraw, int rotate) {
 		if (n1 == 0) {
 			nextYellowWedge(iX(xDraw - square), iY(yDraw), (int) square, rotate);
@@ -274,12 +269,14 @@ class getTetris2 extends Canvas {
 		}
 	}
 
+	// function to store the coordinates of previous fixed drawn squares
 	void leaveMarks() {
-		for (int[] vertex : vertices) {
+		for (int[] vertex : nextCoord) {
 			prevSquares.add(new int[] { vertex[0], vertex[1] });
 		}
 	}
 
+	// function to draw the current moving shape
 	void drawMoveShapes(Graphics g, int n1, float xDraw, float yDraw, int rotate) {
 		if (n1 == 0) {
 			drawYellowWedge(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
@@ -298,6 +295,7 @@ class getTetris2 extends Canvas {
 		}
 	}
 
+	// function to draw the next shape in the fixed next shape box
 	void drawStableShapes(Graphics g, int n2) {
 		if (n2 == 0) {
 			drawYellowWedge(g, iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
@@ -316,6 +314,7 @@ class getTetris2 extends Canvas {
 		}
 	}
 
+	// function to detect if the collision occurs
 	boolean checkCoincidence(int[][] vertices, Set<int[]> prevSquares) {
 		boolean coincidence = false;
 		for (int[] coord : vertices) {
@@ -329,33 +328,16 @@ class getTetris2 extends Canvas {
 		return coincidence;
 	}
 
+	// function to check whether the boundary values are inside the mainare box
 	boolean checkInside() {
-		return (xMin >= xCenter - (int) square * 5 && xMax <= xCenter + (int) square * 5
-				&& yMin >= yCenter - (int) square * 10 && yMax >= yCenter - (int) square * 10);
+		return (xMin >= xCenter - (int) square * 5 && xMax <= xCenter + (int) square * 4
+				&& yMin >= yCenter - (int) square * 10 && yMax <= yCenter + (int) square * 9);
 	}
 
 	// functions to draw all the shapes
 	void drawYellowWedge(Graphics g, int x, int y, int square, int rotate) {
-		if (rotate == 0 || rotate == 2 || rotate == -2) {
-			vertices[0] = new int[] { x, y };
-			vertices[1] = new int[] { x + square, y };
-			vertices[2] = new int[] { x + square, y - square };
-			vertices[3] = new int[] { x + 2 * square, y - square };
-			xMin = x;
-			xMax = x + 2 * square;
-			yMin = y - square;
-			yMax = y;
-		} else if (rotate == 1 || rotate == 3 || rotate == -3 || rotate == -1) {
-			vertices[0] = new int[] { x + square, y };
-			vertices[1] = new int[] { x + square, y - square };
-			vertices[2] = new int[] { x, y - square };
-			vertices[3] = new int[] { x, y - 2 * square };
-			xMin = x;
-			xMax = x + square;
-			yMin = y - 2 * square;
-			yMax = y;
-		}
-		for (int[] coord : vertices) {
+		nextYellowWedge(x, y, square, rotate);
+		for (int[] coord : nextCoord) {
 			int X = coord[0];
 			int Y = coord[1];
 			g.setColor(Color.YELLOW);
@@ -365,6 +347,81 @@ class getTetris2 extends Canvas {
 		}
 	}
 
+	void drawPurpleReverseWedge(Graphics g, int x, int y, int square, int rotate) {
+		nextPurpleReverseWedge(x, y, square, rotate);
+		for (int[] coord : nextCoord) {
+			int X = coord[0];
+			int Y = coord[1];
+			g.setColor(Color.MAGENTA);
+			g.fillRect(X, Y, square, square);
+			g.setColor(Color.black);
+			g.drawRect(X, Y, square, square);
+		}
+	}
+
+	void drawBlueReverseL(Graphics g, int x, int y, int square, int rotate) {
+		nextBlueReverseL(x, y, square, rotate);
+		for (int[] coord : nextCoord) {
+			int X = coord[0];
+			int Y = coord[1];
+			g.setColor(Color.BLUE);
+			g.fillRect(X, Y, square, square);
+			g.setColor(Color.black);
+			g.drawRect(X, Y, square, square);
+		}
+	}
+
+	void drawRedReverseL(Graphics g, int x, int y, int square, int rotate) {
+		nextRedReverseL(x, y, square, rotate);
+		for (int[] coord : nextCoord) {
+			int X = coord[0];
+			int Y = coord[1];
+			g.setColor(Color.RED);
+			g.fillRect(X, Y, square, square);
+			g.setColor(Color.black);
+			g.drawRect(X, Y, square, square);
+		}
+	}
+
+	void drawGreenCube(Graphics g, int x, int y, int square, int rotate) {
+		nextGreenCube(x, y, square, rotate);
+		for (int[] coord : nextCoord) {
+			int X = coord[0];
+			int Y = coord[1];
+			g.setColor(Color.GREEN);
+			g.fillRect(X, Y, square, square);
+			g.setColor(Color.black);
+			g.drawRect(X, Y, square, square);
+
+		}
+	}
+
+	void drawOrangeHill(Graphics g, int x, int y, int square, int rotate) {
+		nextOrangeHill(x, y, square, rotate);
+		for (int[] coord : nextCoord) {
+			int X = coord[0];
+			int Y = coord[1];
+			g.setColor(Color.ORANGE);
+			g.fillRect(X, Y, square, square);
+			g.setColor(Color.black);
+			g.drawRect(X, Y, square, square);
+		}
+	}
+
+	void drawCyanBar(Graphics g, int x, int y, int square, int rotate) {
+		nextCyanBar(x, y, square, rotate);
+		for (int[] coord : nextCoord) {
+			int X = coord[0];
+			int Y = coord[1];
+			g.setColor(Color.CYAN);
+			g.fillRect(X, Y, square, square);
+			g.setColor(Color.black);
+			g.drawRect(X, Y, square, square);
+
+		}
+	}
+
+	// functions to get the coordinates and boundary values of the next move of the shapes
 	void nextYellowWedge(int x, int y, int square, int rotate) {
 		if (rotate == 0 || rotate == 2 || rotate == -2) {
 			nextCoord[0] = new int[] { x, y };
@@ -387,36 +444,6 @@ class getTetris2 extends Canvas {
 		}
 	}
 
-	void drawPurpleReverseWedge(Graphics g, int x, int y, int square, int rotate) {
-		if (rotate == 0 || rotate == 2 || rotate == -2) {
-			vertices[0] = new int[] { x, y };
-			vertices[1] = new int[] { x + square, y };
-			vertices[2] = new int[] { x, y - square };
-			vertices[3] = new int[] { x - square, y - square };
-			xMin = x - square;
-			xMax = x + square;
-			yMin = y - square;
-			yMax = y;
-		} else if (rotate == 1 || rotate == 3 || rotate == -3 || rotate == -1) {
-			vertices[0] = new int[] { x, y };
-			vertices[1] = new int[] { x, y - square };
-			vertices[2] = new int[] { x + square, y - square };
-			vertices[3] = new int[] { x + square, y - 2 * square };
-			xMin = x;
-			xMax = x + square;
-			yMin = y - 2 * square;
-			yMax = y;
-		}
-		for (int[] coord : vertices) {
-			int X = coord[0];
-			int Y = coord[1];
-			g.setColor(Color.MAGENTA);
-			g.fillRect(X, Y, square, square);
-			g.setColor(Color.black);
-			g.drawRect(X, Y, square, square);
-		}
-	}
-
 	void nextPurpleReverseWedge(int x, int y, int square, int rotate) {
 		if (rotate == 0 || rotate == 2 || rotate == -2) {
 			nextCoord[0] = new int[] { x, y };
@@ -436,54 +463,6 @@ class getTetris2 extends Canvas {
 			xMax = x + square;
 			yMin = y - 2 * square;
 			yMax = y;
-		}
-	}
-
-	void drawBlueReverseL(Graphics g, int x, int y, int square, int rotate) {
-		if (rotate == 0) {
-			vertices[0] = new int[] { x, y - square };
-			vertices[1] = new int[] { x, y };
-			vertices[2] = new int[] { x + square, y };
-			vertices[3] = new int[] { x + 2 * square, y };
-			xMin = x;
-			xMax = x + 2 * square;
-			yMin = y - square;
-			yMax = y;
-		} else if (rotate == 1 || rotate == -3) {
-			vertices[0] = new int[] { x, y };
-			vertices[1] = new int[] { x, y - square };
-			vertices[2] = new int[] { x, y - 2 * square };
-			vertices[3] = new int[] { x + square, y - 2 * square };
-			xMin = x;
-			xMax = x + square;
-			yMin = y - 2 * square;
-			yMax = y;
-		} else if (rotate == 2 || rotate == -2) {
-			vertices[0] = new int[] { x + 2 * square, y };
-			vertices[1] = new int[] { x + 2 * square, y - square };
-			vertices[2] = new int[] { x + square, y - square };
-			vertices[3] = new int[] { x, y - square };
-			xMin = x;
-			xMax = x + 2 * square;
-			yMin = y - square;
-			yMax = y;
-		} else if (rotate == 3 || rotate == -1) {
-			vertices[0] = new int[] { x, y };
-			vertices[1] = new int[] { x + square, y };
-			vertices[2] = new int[] { x + square, y - square };
-			vertices[3] = new int[] { x + square, y - 2 * square };
-			xMin = x;
-			xMax = x + square;
-			yMin = y - 2 * square;
-			yMax = y;
-		}
-		for (int[] coord : vertices) {
-			int X = coord[0];
-			int Y = coord[1];
-			g.setColor(Color.BLUE);
-			g.fillRect(X, Y, square, square);
-			g.setColor(Color.black);
-			g.drawRect(X, Y, square, square);
 		}
 	}
 
@@ -527,55 +506,6 @@ class getTetris2 extends Canvas {
 		}
 	}
 
-	void drawRedReverseL(Graphics g, int x, int y, int square, int rotate) {
-		if (rotate == 0) {
-			vertices[0] = new int[] { x, y };
-			vertices[1] = new int[] { x + square, y };
-			vertices[2] = new int[] { x + 2 * square, y };
-			vertices[3] = new int[] { x + 2 * square, y - square };
-			xMin = x;
-			xMax = x + 2 * square;
-			yMin = y - square;
-			yMax = y;
-		} else if (rotate == 1 || rotate == -3) {
-			vertices[0] = new int[] { x, y };
-			vertices[1] = new int[] { x + square, y };
-			vertices[2] = new int[] { x, y - square };
-			vertices[3] = new int[] { x, y - 2 * square };
-			xMin = x;
-			xMax = x + square;
-			yMin = y - 2 * square;
-			yMax = y;
-		} else if (rotate == 2 || rotate == -2) {
-			vertices[0] = new int[] { x, y };
-			vertices[1] = new int[] { x, y - square };
-			vertices[2] = new int[] { x + square, y - square };
-			vertices[3] = new int[] { x + 2 * square, y - square };
-			xMin = x;
-			xMax = x + 2 * square;
-			yMin = y - square;
-			yMax = y;
-		} else if (rotate == 3 || rotate == -1) {
-			vertices[0] = new int[] { x + square, y };
-			vertices[1] = new int[] { x + square, y - square };
-			vertices[2] = new int[] { x + square, y - 2 * square };
-			vertices[3] = new int[] { x, y - 2 * square };
-			xMin = x;
-			xMax = x + square;
-			yMin = y - 2 * square;
-			yMax = y;
-		}
-
-		for (int[] coord : vertices) {
-			int X = coord[0];
-			int Y = coord[1];
-			g.setColor(Color.RED);
-			g.fillRect(X, Y, square, square);
-			g.setColor(Color.black);
-			g.drawRect(X, Y, square, square);
-		}
-	}
-
 	void nextRedReverseL(int x, int y, int square, int rotate) {
 		if (rotate == 0) {
 			nextCoord[0] = new int[] { x, y };
@@ -616,26 +546,6 @@ class getTetris2 extends Canvas {
 		}
 	}
 
-	void drawGreenCube(Graphics g, int x, int y, int square, int rotate) {
-		vertices[0] = new int[] { x, y };
-		vertices[1] = new int[] { x + square, y };
-		vertices[2] = new int[] { x + square, y - square };
-		vertices[3] = new int[] { x, y - square };
-		xMin = x;
-		xMax = x + square;
-		yMin = y - square;
-		yMax = y;
-		for (int[] coord : vertices) {
-			int X = coord[0];
-			int Y = coord[1];
-			g.setColor(Color.GREEN);
-			g.fillRect(X, Y, square, square);
-			g.setColor(Color.black);
-			g.drawRect(X, Y, square, square);
-
-		}
-	}
-
 	void nextGreenCube(int x, int y, int square, int rotate) {
 		nextCoord[0] = new int[] { x, y };
 		nextCoord[1] = new int[] { x + square, y };
@@ -645,55 +555,6 @@ class getTetris2 extends Canvas {
 		xMax = x + square;
 		yMin = y - square;
 		yMax = y;
-	}
-
-	void drawOrangeHill(Graphics g, int x, int y, int square, int rotate) {
-		if (rotate == 0) {
-			vertices[0] = new int[] { x, y };
-			vertices[1] = new int[] { x + square, y };
-			vertices[2] = new int[] { x + square, y - square };
-			vertices[3] = new int[] { x + 2 * square, y };
-			xMin = x;
-			xMax = x + 2 * square;
-			yMin = y - square;
-			yMax = y;
-		} else if (rotate == 1 || rotate == -3) {
-			vertices[0] = new int[] { x, y };
-			vertices[1] = new int[] { x, y - square };
-			vertices[2] = new int[] { x + square, y - square };
-			vertices[3] = new int[] { x, y - 2 * square };
-			xMin = x;
-			xMax = x + square;
-			yMin = y - 2 * square;
-			yMax = y;
-		} else if (rotate == 2 || rotate == -2) {
-			vertices[0] = new int[] { x + square, y };
-			vertices[1] = new int[] { x + square, y - square };
-			vertices[2] = new int[] { x, y - square };
-			vertices[3] = new int[] { x + 2 * square, y - square };
-			xMin = x;
-			xMax = x + 2 * square;
-			yMin = y - square;
-			yMax = y;
-		} else if (rotate == 3 || rotate == -1) {
-			vertices[0] = new int[] { x + square, y };
-			vertices[1] = new int[] { x + square, y - square };
-			vertices[2] = new int[] { x, y - square };
-			vertices[3] = new int[] { x + square, y - 2 * square };
-			xMin = x;
-			xMax = x + square;
-			yMin = y - 2 * square;
-			yMax = y;
-		}
-
-		for (int[] coord : vertices) {
-			int X = coord[0];
-			int Y = coord[1];
-			g.setColor(Color.ORANGE);
-			g.fillRect(X, Y, square, square);
-			g.setColor(Color.black);
-			g.drawRect(X, Y, square, square);
-		}
 	}
 
 	void nextOrangeHill(int x, int y, int square, int rotate) {
@@ -736,37 +597,6 @@ class getTetris2 extends Canvas {
 		}
 	}
 
-	void drawCyanBar(Graphics g, int x, int y, int square, int rotate) {
-		if (rotate == 0 || rotate == 2 || rotate == -2) {
-			vertices[0] = new int[] { x, y };
-			vertices[1] = new int[] { x + square, y };
-			vertices[2] = new int[] { x + 2 * square, y };
-			vertices[3] = new int[] { x + 3 * square, y };
-			xMin = x;
-			xMax = x + 3 * square;
-			yMin = y;
-			yMax = y;
-		} else if (rotate == 1 || rotate == 3 || rotate == -1 || rotate == -3) {
-			vertices[0] = new int[] { x + square, y };
-			vertices[1] = new int[] { x + square, y - square };
-			vertices[2] = new int[] { x + square, y - 2 * square };
-			vertices[3] = new int[] { x + square, y - 3 * square };
-			xMin = x + square;
-			xMax = x + square;
-			yMin = y - 3 * square;
-			yMax = y;
-		}
-		for (int[] coord : vertices) {
-			int X = coord[0];
-			int Y = coord[1];
-			g.setColor(Color.CYAN);
-			g.fillRect(X, Y, square, square);
-			g.setColor(Color.black);
-			g.drawRect(X, Y, square, square);
-
-		}
-	}
-
 	void nextCyanBar(int x, int y, int square, int rotate) {
 		if (rotate == 0 || rotate == 2 || rotate == -2) {
 			nextCoord[0] = new int[] { x, y };
@@ -779,14 +609,13 @@ class getTetris2 extends Canvas {
 			yMax = y;
 		} else if (rotate == 1 || rotate == 3 || rotate == -1 || rotate == -3) {
 			nextCoord[0] = new int[] { x + square, y };
-			nextCoord[1] = new int[] { x + square, y - square };
-			nextCoord[2] = new int[] { x + square, y - 2 * square };
-			nextCoord[3] = new int[] { x + square, y - 3 * square };
+			nextCoord[1] = new int[] { x + square, y + square };
+			nextCoord[2] = new int[] { x + square, y + 2 * square };
+			nextCoord[3] = new int[] { x + square, y + 3 * square };
 			xMin = x + square;
 			xMax = x + square;
-			yMin = y - 3 * square;
-			yMax = y;
+			yMin = y;
+			yMax = y + 3 * square;
 		}
 	}
-
 }
