@@ -416,17 +416,17 @@ class getTetris2 extends Canvas {
 
 	void drawMoveShapes(Graphics g, int n1, float xDraw, float yDraw, int rotate) {
 		if (n1 == 0) {
-			drawYellowWedge(g, iX(xDraw - 1.5F * square), iY(yDraw), (int) square, rotate);
+			drawYellowWedge(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
 		} else if (n1 == 1) {
-			drawPurpleReverseWedge(g, iX(xDraw - 0.5F * square), iY(yDraw), (int) square, rotate);
+			drawPurpleReverseWedge(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
 		} else if (n1 == 2) {
-			drawBlueReverseL(g, iX(xDraw - 1.5F * square), iY(yDraw), (int) square, rotate);
+			drawBlueReverseL(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
 		} else if (n1 == 3) {
-			drawRedReverseL(g, iX(xDraw - 1.5F * square), iY(yDraw), (int) square, rotate);
+			drawRedReverseL(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
 		} else if (n1 == 4) {
 			drawGreenCube(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
 		} else if (n1 == 5) {
-			drawOrangeHill(g, iX(xDraw - 1.5F * square), iY(yDraw), (int) square, rotate);
+			drawOrangeHill(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
 		} else {
 			drawCyanBar(g, iX(xDraw - 2 * square), iY(yDraw + square), (int) square, rotate);
 		}
