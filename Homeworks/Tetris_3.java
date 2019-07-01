@@ -81,12 +81,12 @@ class getTetris3 extends Canvas {
 	int score = 0, M = 1, N = 20;
 	float S = 0.1F;
 
-	Timer timer = new Timer(delay, new ActionListener() {
+	Timer timer = new Timer(200, new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
 			checkValid(n1, xDraw, yDraw - square, rotate);
-			boolean coincidence = checkCoincidence(nextCoord, prevSquares);
+			boolean coincidence = newcheckCoincidence(nextCoord, prevs);
 			if (!coincidence && checkInside() && !show) {
 				count += 1;
 				repaint();
@@ -342,18 +342,22 @@ class getTetris3 extends Canvas {
 					Ys.add(Y);
 				}
 			}
+			Set<Square> newSet = new HashSet<>();
 			for (Square square : prevs) {
 				if (Ys.contains(square.Y)) {
-					prevs.remove(square);
+					continue;
 				} else {
 					for (int Y : Ys) {
 						if (square.Y > Y) {
 							square.Y--;
 						}
 					}
+					newSet.add(square);
 				}
 			}
+			prevs = newSet;
 		}
+
 	}
 
 	// function to draw the current moving shape
@@ -400,6 +404,19 @@ class getTetris3 extends Canvas {
 		for (int[] coord : vertices) {
 			for (int[] prev : prevSquares) {
 				if (coord[0] == prev[0] && coord[1] == prev[1]) {
+					coincidence = true;
+					break;
+				}
+			}
+		}
+		return coincidence;
+	}
+	
+	boolean newcheckCoincidence(int[][] vertices, Set<Square> prevs) {
+		boolean coincidence = false;
+		for (int[] coord : vertices) {
+			for (Square prev : prevs) {
+				if (coord[0] == prev.X && coord[1] == prev.Y) {
 					coincidence = true;
 					break;
 				}
