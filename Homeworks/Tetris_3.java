@@ -343,16 +343,16 @@ class getTetris3 extends Canvas {
 				}
 			}
 			Set<Square> newSet = new HashSet<>();
-			for (Square square : prevs) {
-				if (Ys.contains(square.Y)) {
+			for (Square cube : prevs) {
+				if (Ys.contains(cube.Y)) {
 					continue;
 				} else {
 					for (int Y : Ys) {
-						if (square.Y > Y) {
-							square.Y--;
+						if (cube.Y < Y) {
+							cube.Y = cube.Y + (int)square;
 						}
 					}
-					newSet.add(square);
+					newSet.add(cube);
 				}
 			}
 			prevs = newSet;
