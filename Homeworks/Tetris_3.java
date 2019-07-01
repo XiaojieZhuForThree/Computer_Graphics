@@ -331,24 +331,24 @@ class getTetris3 extends Canvas {
 	}
 
 	void checkErase() {
-		Set<Integer> Xs = new HashSet<>();
+		Set<Integer> Ys = new HashSet<>();
 		Map<Integer, Integer> map = new HashMap<>();
 		if (!prevs.isEmpty()) {
 			for (Square square : prevs) {
-				map.put(square.X, map.getOrDefault(square.X, 0) + 1);
+				map.put(square.Y, map.getOrDefault(square.Y, 0) + 1);
 			}
-			for (int X : map.keySet()) {
-				if (map.get(X) >= 10) {
-					Xs.add(X);
+			for (int Y : map.keySet()) {
+				if (map.get(Y) >= 10) {
+					Ys.add(Y);
 				}
 			}
 			for (Square square : prevs) {
-				if (Xs.contains(square.X)) {
+				if (Ys.contains(square.Y)) {
 					prevs.remove(square);
 				} else {
-					for (int X : Xs) {
-						if (square.X > X) {
-							square.X++;
+					for (int Y : Ys) {
+						if (square.Y > Y) {
+							square.Y--;
 						}
 					}
 				}
