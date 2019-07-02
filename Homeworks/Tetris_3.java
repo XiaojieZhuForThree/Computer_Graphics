@@ -275,23 +275,6 @@ class getTetris3 extends Canvas {
 	// function to get the coordinates and boundary values of the next possible move
 	// of the shapes
 	// the data are stored in the global array and variables
-	Color getColor(int n) {
-		if (n == 0) {
-			return Color.YELLOW;
-		} else if (n == 1) {
-			return Color.MAGENTA;
-		} else if (n == 2) {
-			return Color.BLUE;
-		} else if (n == 3) {
-			return Color.RED;
-		} else if (n == 4) {
-			return Color.GREEN;
-		} else if (n == 5) {
-			return Color.ORANGE;
-		} else {
-			return Color.CYAN;
-		}
-	}
 
 	void checkValid(int n1, float xDraw, float yDraw, int rotate) {
 		if (n1 == 0) {
@@ -388,18 +371,6 @@ class getTetris3 extends Canvas {
 	}
 
 	// function to detect if the collision occurs
-	boolean checkCoincidence(int[][] vertices, Set<int[]> prevSquares) {
-		boolean coincidence = false;
-		for (int[] coord : vertices) {
-			for (int[] prev : prevSquares) {
-				if (coord[0] == prev[0] && coord[1] == prev[1]) {
-					coincidence = true;
-					break;
-				}
-			}
-		}
-		return coincidence;
-	}
 
 	boolean newcheckCoincidence(int[][] vertices, Set<Square> prevs) {
 		boolean coincidence = false;
@@ -418,6 +389,24 @@ class getTetris3 extends Canvas {
 	boolean checkInside() {
 		return (xMin >= xCenter - (int) square * 5 && xMax <= xCenter + (int) square * 4
 				&& yMin >= yCenter - (int) square * 10 && yMax <= yCenter + (int) square * 9);
+	}
+
+	Color getColor(int n) {
+		if (n == 0) {
+			return Color.YELLOW;
+		} else if (n == 1) {
+			return Color.MAGENTA;
+		} else if (n == 2) {
+			return Color.BLUE;
+		} else if (n == 3) {
+			return Color.RED;
+		} else if (n == 4) {
+			return Color.GREEN;
+		} else if (n == 5) {
+			return Color.ORANGE;
+		} else {
+			return Color.CYAN;
+		}
 	}
 
 	// functions to draw all the shapes
