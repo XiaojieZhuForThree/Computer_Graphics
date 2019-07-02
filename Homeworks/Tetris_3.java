@@ -65,9 +65,8 @@ class getTetris3 extends Canvas {
 	int rotate = 0;
 	// to determine the coordinates for the cursor
 	int mouse1x, mouse1y, mouse2x, mouse2y;
-	Set<int[]> prevDraws = new HashSet<>();
-	Set<int[]> prevSquares;
-	Set<Square> prevs = new HashSet<>();
+	List<int[]> prevDraws = new ArrayList<>();
+	Set<Square> prevs;
 	// random number generator
 	Random rand = new Random();
 
@@ -91,10 +90,10 @@ class getTetris3 extends Canvas {
 				count += 1;
 				repaint();
 			} else if ((coincidence || !checkInside()) && !show) {
-				checkValid(n1, xDraw, yDraw, rotate);
-				newLeaveMarks(n1);
-				checkErase();
-				//prevDraws.add(new int[] { n1, count, leftMove, rotate });
+//				checkValid(n1, xDraw, yDraw, rotate);
+//				newLeaveMarks(n1);
+//				checkErase();
+				prevDraws.add(new int[] { n1, count, leftMove, rotate });
 				n1 = n2;
 				n2 = rand.nextInt(7);
 				count = 0;
@@ -192,8 +191,7 @@ class getTetris3 extends Canvas {
 	public void paint(Graphics g) {
 		timer.start();
 		initgr();
-		prevSquares = new HashSet<>();
-//		prevs = new HashSet<>();
+		prevs = new HashSet<>();
 		square = (float) (minMaxXY / 30); // customarily set the length to be the minMaxXY / 30
 
 		// coordinates for the main area
@@ -245,27 +243,20 @@ class getTetris3 extends Canvas {
 		g.drawString("Score:      0", iX(xJ), iY(yJ));
 
 		// draw the previous staying shapes
-//		for (int[] info : prevDraws) {
-//			int n = info[0];
-//			int oldCount = info[1];
-//			int oldLeftMove = info[2];
-//			int oldRotate = info[3];
-//			checkValid(n, xCenter - oldLeftMove * square, yCenter + (9 - oldCount) * square, oldRotate);
-//			newLeaveMarks(n);
-//		}
-//		checkErase();
+		for (int[] info : prevDraws) {
+			int n = info[0];
+			int oldCount = info[1];
+			int oldLeftMove = info[2];
+			int oldRotate = info[3];
+			checkValid(n, xCenter - oldLeftMove * square, yCenter + (9 - oldCount) * square, oldRotate);
+			newLeaveMarks(n);
+			checkErase();
+		}
+
 		for (Square square : prevs) {
 			drawSquare(g, square);
 		}
 
-//		for (int[] info : prevDraws) {
-//			int n = info[0];
-//			int oldCount = info[1];
-//			int oldLeftMove = info[2];
-//			int oldRotate = info[3];
-//			drawMoveShapes(g, n, xCenter - oldLeftMove * square, yCenter + (9 - oldCount) * square, oldRotate);
-//			leaveMarks();
-//		}
 		// draw the shape at the next box
 		drawStableShapes(g, n2);
 		// draw the current falling shape
@@ -321,11 +312,6 @@ class getTetris3 extends Canvas {
 	}
 
 	// function to store the coordinates of previous fixed drawn squares
-	void leaveMarks() {
-		for (int[] vertex : nextCoord) {
-			prevSquares.add(new int[] { vertex[0], vertex[1] });
-		}
-	}
 
 	void newLeaveMarks(int n) {
 		for (int[] vertex : nextCoord) {
