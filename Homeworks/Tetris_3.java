@@ -67,7 +67,7 @@ class getTetris3 extends Canvas {
 	int mouse1x, mouse1y, mouse2x, mouse2y;
 	Set<int[]> prevDraws = new HashSet<>();
 	Set<int[]> prevSquares;
-	Set<Square> prevs;
+	Set<Square> prevs = new HashSet<>();
 	// random number generator
 	Random rand = new Random();
 
@@ -81,7 +81,7 @@ class getTetris3 extends Canvas {
 	int score = 0, M = 1, N = 20;
 	float S = 0.1F;
 
-	Timer timer = new Timer(200, new ActionListener() {
+	Timer timer = new Timer(300, new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
@@ -91,7 +91,10 @@ class getTetris3 extends Canvas {
 				count += 1;
 				repaint();
 			} else if ((coincidence || !checkInside()) && !show) {
-				prevDraws.add(new int[] { n1, count, leftMove, rotate });
+				checkValid(n1, xDraw, yDraw, rotate);
+				newLeaveMarks(n1);
+				checkErase();
+				//prevDraws.add(new int[] { n1, count, leftMove, rotate });
 				n1 = n2;
 				n2 = rand.nextInt(7);
 				count = 0;
@@ -135,13 +138,13 @@ class getTetris3 extends Canvas {
 			public void mouseClicked(MouseEvent event) {
 				if (event.getButton() == MouseEvent.BUTTON1 && show == false) {
 					checkValid(n1, xDraw - square, yDraw, rotate);
-					if (!checkCoincidence(nextCoord, prevSquares) && checkInside()) {
+					if (!newcheckCoincidence(nextCoord, prevs) && checkInside()) {
 						leftMove++;
 						repaint();
 					}
 				} else if (event.getButton() == MouseEvent.BUTTON3 && show == false) {
 					checkValid(n1, xDraw + square, yDraw, rotate);
-					if (!checkCoincidence(nextCoord, prevSquares) && checkInside()) {
+					if (!newcheckCoincidence(nextCoord, prevs) && checkInside()) {
 						leftMove--;
 						repaint();
 					}
@@ -153,14 +156,14 @@ class getTetris3 extends Canvas {
 			public void mouseWheelMoved(MouseWheelEvent event) {
 				if (event.getWheelRotation() < 0 && !show) {
 					checkValid(n1, xDraw, yDraw, (rotate + 1) % 4);
-					if (!(checkCoincidence(nextCoord, prevSquares)) && checkInside()) {
+					if (!newcheckCoincidence(nextCoord, prevs) && checkInside()) {
 						rotate = (rotate + 1) % 4;
 						repaint();
 					}
 
 				} else if (event.getWheelRotation() > 0 && !show) {
 					checkValid(n1, xDraw, yDraw, (rotate - 1) % 4);
-					if (!(checkCoincidence(nextCoord, prevSquares)) && checkInside()) {
+					if (!newcheckCoincidence(nextCoord, prevs) && checkInside()) {
 						rotate = (rotate - 1) % 4;
 						repaint();
 					}
@@ -190,7 +193,7 @@ class getTetris3 extends Canvas {
 		timer.start();
 		initgr();
 		prevSquares = new HashSet<>();
-		prevs = new HashSet<>();
+//		prevs = new HashSet<>();
 		square = (float) (minMaxXY / 30); // customarily set the length to be the minMaxXY / 30
 
 		// coordinates for the main area
@@ -242,15 +245,15 @@ class getTetris3 extends Canvas {
 		g.drawString("Score:      0", iX(xJ), iY(yJ));
 
 		// draw the previous staying shapes
-		for (int[] info : prevDraws) {
-			int n = info[0];
-			int oldCount = info[1];
-			int oldLeftMove = info[2];
-			int oldRotate = info[3];
-			checkValid(n, xCenter - oldLeftMove * square, yCenter + (9 - oldCount) * square, oldRotate);
-			newLeaveMarks(n);
-		}
-		checkErase();
+//		for (int[] info : prevDraws) {
+//			int n = info[0];
+//			int oldCount = info[1];
+//			int oldLeftMove = info[2];
+//			int oldRotate = info[3];
+//			checkValid(n, xCenter - oldLeftMove * square, yCenter + (9 - oldCount) * square, oldRotate);
+//			newLeaveMarks(n);
+//		}
+//		checkErase();
 		for (Square square : prevs) {
 			drawSquare(g, square);
 		}
@@ -338,7 +341,7 @@ class getTetris3 extends Canvas {
 				map.put(square.Y, map.getOrDefault(square.Y, 0) + 1);
 			}
 			for (int Y : map.keySet()) {
-				if (map.get(Y) >= 10) {
+				if (map.get(Y) == 10) {
 					Ys.add(Y);
 				}
 			}
@@ -349,10 +352,10 @@ class getTetris3 extends Canvas {
 				} else {
 					for (int Y : Ys) {
 						if (cube.Y < Y) {
-							cube.Y = cube.Y + (int)square;
+							cube.Y += (int) square;
 						}
 					}
-					newSet.add(cube);
+					newSet.add(new Square(cube.X, cube.Y, cube.color));
 				}
 			}
 			prevs = newSet;
@@ -411,7 +414,7 @@ class getTetris3 extends Canvas {
 		}
 		return coincidence;
 	}
-	
+
 	boolean newcheckCoincidence(int[][] vertices, Set<Square> prevs) {
 		boolean coincidence = false;
 		for (int[] coord : vertices) {
