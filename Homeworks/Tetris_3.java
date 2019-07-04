@@ -78,6 +78,8 @@ class getTetris3 extends Canvas {
 	int[][] nextCoord = new int[4][2];
 
 	int score = 0, M = 1, N = 20;
+	int level = 1;
+	int removedRows = 0;
 	float S = 0.1F;
 
 	Timer timer = new Timer(300, new ActionListener() {
@@ -193,7 +195,9 @@ class getTetris3 extends Canvas {
 		initgr();
 		prevs = new HashSet<>();
 		square = (float) (minMaxXY / 30); // customarily set the length to be the minMaxXY / 30
-
+		removedRows = 0;
+		level = 1;
+		score = 0;
 		// coordinates for the main area
 		xA = (float) xCenter - square * 5;
 		yA = (float) yCenter + square * 10;
@@ -232,16 +236,6 @@ class getTetris3 extends Canvas {
 		g.drawRect(iX(xB), iY(yB), (int) (square * 5), (int) (square * 3));
 		g.drawRect(iX(xK), iY(yK), (int) (square * 4), (int) (square * (float) 1.5));
 
-		// draw the strings
-		Font f = new Font("Dialog", Font.BOLD, (int) square);
-		g.setFont(f);
-		g.drawString("Level:      1", iX(xH), iY(yH));
-		g.drawString("Lines:      0", iX(xI), iY(yI));
-		g.drawString("QUIT", iX(xL), iY(yL));
-		f = new Font("Dialog", Font.BOLD, (int) (square));
-		g.setFont(f);
-		g.drawString("Score:      0", iX(xJ), iY(yJ));
-
 		// draw the previous staying shapes
 		for (int[] info : prevDraws) {
 			int n = info[0];
@@ -252,7 +246,12 @@ class getTetris3 extends Canvas {
 			newLeaveMarks(n);
 			checkErase();
 		}
-
+		for (int i = 1; i <= removedRows; i++) {
+			score += level * M;
+			if (i % 20 == 0) {
+				level++;
+			}
+		}
 		for (Square square : prevs) {
 			drawSquare(g, square);
 		}
@@ -261,6 +260,16 @@ class getTetris3 extends Canvas {
 		drawStableShapes(g, n2);
 		// draw the current falling shape
 		drawMoveShapes(g, n1, xDraw, yDraw, rotate);
+
+		// draw the strings
+		Font f = new Font("Dialog", Font.BOLD, (int) square);
+		g.setFont(f);
+		g.drawString("Level:      " + String.valueOf(level), iX(xH), iY(yH));
+		g.drawString("Lines:      " + String.valueOf(removedRows), iX(xI), iY(yI));
+		g.drawString("QUIT", iX(xL), iY(yL));
+		f = new Font("Dialog", Font.BOLD, (int) (square));
+		g.setFont(f);
+		g.drawString("Score:      " + String.valueOf(score), iX(xJ), iY(yJ));
 
 		// draw the pause button, determined by the value of show
 		if (show) {
@@ -310,8 +319,9 @@ class getTetris3 extends Canvas {
 				map.put(square.Y, map.getOrDefault(square.Y, 0) + 1);
 			}
 			for (int Y : map.keySet()) {
-				if (map.get(Y) == 10) {
+				if (map.get(Y) >= 10) {
 					Ys.add(Y);
+					removedRows++;
 				}
 			}
 			Set<Square> newSet = new HashSet<>();
