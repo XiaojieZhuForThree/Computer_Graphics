@@ -73,16 +73,16 @@ class getTetris3 extends Canvas {
 	// Obtain a number between [0 - 6].
 	int n1 = rand.nextInt(7);
 	int n2 = rand.nextInt(7);
-	int delay = 700;
+	float delay = 700F;
 	int xMin, xMax, yMin, yMax;
 	int[][] nextCoord = new int[4][2];
 
 	int score = 0, M = 1, N = 20;
-	int level = 1;
+	int level = 1, previousLevel = 1;
 	int removedRows = 0;
 	float S = 0.1F;
 
-	Timer timer = new Timer(delay, new ActionListener() {
+	Timer timer = new Timer((int) delay, new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
@@ -253,8 +253,11 @@ class getTetris3 extends Canvas {
 				level++;
 			}
 		}
-		newdelay -= 100 * level;
-		timer.setDelay(newdelay);
+		if (level > previousLevel) {
+			delay /= (1 + level); 
+			previousLevel = level;
+		}
+		timer.setDelay((int) delay);
 		for (Square square : prevs) {
 			drawSquare(g, square);
 		}
