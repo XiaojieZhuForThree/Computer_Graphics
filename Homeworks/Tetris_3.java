@@ -82,7 +82,7 @@ class getTetris3 extends Canvas {
 	int removedRows = 0;
 	float S = 0.1F;
 
-	Timer timer = new Timer(300, new ActionListener() {
+	Timer timer = new Timer(delay, new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
@@ -198,6 +198,7 @@ class getTetris3 extends Canvas {
 		removedRows = 0;
 		level = 1;
 		score = 0;
+		int newdelay = 800;
 		// coordinates for the main area
 		xA = (float) xCenter - square * 5;
 		yA = (float) yCenter + square * 10;
@@ -248,10 +249,12 @@ class getTetris3 extends Canvas {
 		}
 		for (int i = 1; i <= removedRows; i++) {
 			score += level * M;
-			if (i % 20 == 0) {
+			if (i % 5 == 0) {
 				level++;
 			}
 		}
+		newdelay -= 100 * level;
+		timer.setDelay(newdelay);
 		for (Square square : prevs) {
 			drawSquare(g, square);
 		}
@@ -329,12 +332,13 @@ class getTetris3 extends Canvas {
 				if (Ys.contains(cube.Y)) {
 					continue;
 				} else {
+					int replaceY = cube.Y;
 					for (int Y : Ys) {
 						if (cube.Y < Y) {
-							cube.Y += (int) square;
+							replaceY += (int) square;
 						}
 					}
-					newSet.add(new Square(cube.X, cube.Y, cube.color));
+					newSet.add(new Square(cube.X, replaceY, cube.color));
 				}
 			}
 			prevs = newSet;
