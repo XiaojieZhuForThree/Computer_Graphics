@@ -4,9 +4,11 @@ import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -16,23 +18,45 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.*;
 
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+//class ScoringFactor {
+//	JSlider bar;
+//	JLabel label;
+//
+//	ScoringFactor() {
+//		bar = new JSlider(JSlider.HORIZONTAL, 1, 10, 1);
+//		bar.setMajorTickSpacing(1);
+//		bar.setPaintTicks(true);
+//	}
+//
+//	class event implements ChangeListener {
+//		public void stateChanged(ChangeEvent e) {
+//			int value = bar.getValue();
+//			label.setText("Scoring Factor: " + value);
+//		}
+//	}
+//}
 
 public class Tetris_3 extends Frame {
+	// global variables
 	JSlider scoringFactor;
 	JLabel sfLabel;
+
+	JSlider levelClimber;
+	JLabel lcLabel;
 
 	public static void main(String[] args) {
 		new Tetris_3();
 	}
 
 //	constructor
-
 	Tetris_3() {
 		super("Tetris_3");
 		addWindowListener(new WindowAdapter() {
@@ -40,16 +64,18 @@ public class Tetris_3 extends Frame {
 				System.exit(0);
 			}
 		});
-//
-//		scoringFactor.setMajorTickSpacing(1);
-//
-//		sfLabel = new JLabel();
-//		sfLabel.setText("Set the scoring Factor: ");
-		add("Center", new getTetris3());
-		add(scoringFactor, BorderLayout.EAST);
 
+		add(new getTetris3(), BorderLayout.CENTER);
+		Panel panel = new Panel();
+		panel.add(sfLabel);
+		panel.add(scoringFactor);
+		panel.add(lcLabel);
+		panel.add(levelClimber);
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		add(panel, BorderLayout.EAST);
 		setSize(800, 600);
 		setVisible(true);
+		// setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 	}
 
 	class getTetris3 extends Canvas {
@@ -80,7 +106,7 @@ public class Tetris_3 extends Frame {
 		int xMin, xMax, yMin, yMax;
 		int[][] nextCoord = new int[4][2];
 
-		int score = 0, N = 20, M;
+		int score = 0, M, N = 20;
 		int level = 1, previousLevel = 1;
 		int removedRows = 0;
 		float S = 0.1F;
@@ -134,6 +160,10 @@ public class Tetris_3 extends Frame {
 			scoringFactor.setMajorTickSpacing(1);
 			scoringFactor.setPaintTicks(true);
 			sfLabel = new JLabel("Scoring Factor: 1");
+			levelClimber = new JSlider(JSlider.HORIZONTAL, 20, 50, 20);
+			levelClimber.setMajorTickSpacing(5);
+			levelClimber.setPaintTicks(true);
+			lcLabel = new JLabel("Lines Removed Required for level up: 20");
 
 			addMouseListener(new MouseAdapter() {
 				public void mousePressed(MouseEvent event) {
@@ -728,6 +758,7 @@ public class Tetris_3 extends Frame {
 			}
 		}
 	}
+
 }
 
 class Square {
