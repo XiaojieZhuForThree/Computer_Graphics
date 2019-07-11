@@ -242,7 +242,7 @@ public class Tetris_3 extends Frame {
 				} else if ((coincidence || !checkInside()) && !show) {
 					prevDraws.add(new int[] { n1, count, leftMove, rotate });
 					n1 = n2;
-					n2 = rand.nextInt(8);
+					n2 = rand.nextInt(10);
 					count = 0;
 					leftMove = 0;
 					rotate = 0;
@@ -354,11 +354,11 @@ public class Tetris_3 extends Frame {
 						if (!inside) {
 							stillIn = false;
 						} else if (inside && !stillIn) {
-							int n3 = rand.nextInt(8);
+							int n3 = rand.nextInt(10);
 							rotate = 0;
 							checkValid(n3, xDraw, yDraw - square, rotate);
 							while (n3 == n1 || n3 == n2 || newcheckCoincidence(nextCoord, prevs) || !checkInside()) {
-								n3 = rand.nextInt(8);
+								n3 = rand.nextInt(10);
 								checkValid(n3, xDraw, yDraw - square, rotate);
 							}
 							n1 = n3;
@@ -505,8 +505,12 @@ public class Tetris_3 extends Frame {
 				nextOrangeHill(iX(xDraw - square), iY(yDraw), (int) square, rotate);
 			} else if (n1 == 6) {
 				nextCyanBar(iX(xDraw - 2 * square), iY(yDraw + square), (int) square, rotate);
-			} else {
+			} else if (n1 == 7) {
 				nextGrayTri(iX(xDraw - square), iY(yDraw), (int) square, rotate);
+			} else if (n1 == 8) {
+				nextGrassTri(iX(xDraw - square), iY(yDraw), (int) square, rotate);
+			} else {
+				nextPinkTri(iX(xDraw - square), iY(yDraw + square), (int) square, rotate);
 			}
 		}
 
@@ -567,8 +571,12 @@ public class Tetris_3 extends Frame {
 				drawOrangeHill(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
 			} else if (n1 == 6) {
 				drawCyanBar(g, iX(xDraw - 2 * square), iY(yDraw + square), (int) square, rotate);
-			} else {
+			} else if (n1 == 7) {
 				drawGrayTri(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
+			} else if (n1 == 8) {
+				drawGrassTri(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
+			} else {
+				drawPinkTri(g, iX(xDraw - square), iY(yDraw + square), (int) square, rotate);
 			}
 
 		}
@@ -589,8 +597,12 @@ public class Tetris_3 extends Frame {
 				drawOrangeHill(g, iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
 			} else if (n2 == 6) {
 				drawCyanBar(g, iX(xB + 0.5F * square), iY(yB - square), (int) square, 0);
-			} else {
+			} else if (n2 == 7) {
 				drawGrayTri(g, iX(xB + 1.5F * square), iY(yB - 1.5F * square), (int) square, 0);
+			} else if (n2 == 8) {
+				drawGrassTri(g, iX(xB + 1.5F * square), iY(yB - 1.5F * square), (int) square, 0);
+			} else {
+				drawPinkTri(g, iX(xB + 1.5F * square), iY(yB - square), (int) square, 0);
 			}
 		}
 
@@ -630,8 +642,12 @@ public class Tetris_3 extends Frame {
 				return Color.ORANGE;
 			} else if (n == 6) {
 				return Color.CYAN;
-			} else {
+			} else if (n == 7) {
 				return Color.GRAY;
+			} else if (n == 8) {
+				return new Color(0xb7, 0xe1, 0xa1);
+			} else {
+				return Color.PINK;
 			}
 		}
 
@@ -741,6 +757,30 @@ public class Tetris_3 extends Frame {
 				int X = coord[0];
 				int Y = coord[1];
 				g.setColor(Color.GRAY);
+				g.fillRect(X, Y, square, square);
+				g.setColor(Color.black);
+				g.drawRect(X, Y, square, square);
+			}
+		}
+
+		void drawGrassTri(Graphics g, int x, int y, int square, int rotate) {
+			nextGrassTri(x, y, square, rotate);
+			for (int[] coord : nextCoord) {
+				int X = coord[0];
+				int Y = coord[1];
+				g.setColor(new Color(0xb7, 0xe1, 0xa1));
+				g.fillRect(X, Y, square, square);
+				g.setColor(Color.black);
+				g.drawRect(X, Y, square, square);
+			}
+		}
+
+		void drawPinkTri(Graphics g, int x, int y, int square, int rotate) {
+			nextPinkTri(x, y, square, rotate);
+			for (int[] coord : nextCoord) {
+				int X = coord[0];
+				int Y = coord[1];
+				g.setColor(Color.PINK);
 				g.fillRect(X, Y, square, square);
 				g.setColor(Color.black);
 				g.drawRect(X, Y, square, square);
@@ -996,6 +1036,63 @@ public class Tetris_3 extends Frame {
 				yMax = y;
 			}
 		}
-	}
 
+		void nextGrassTri(int x, int y, int square, int rotate) {
+			nextCoord = new ArrayList<>();
+			if (rotate == 0) {
+				nextCoord.add(new int[] { x + square, y });
+				nextCoord.add(new int[] { x + 2 * square, y });
+				nextCoord.add(new int[] { x, y - square });
+				xMin = x;
+				xMax = x + 2 * square;
+				yMin = y - square;
+				yMax = y;
+			} else if (rotate == 1 || rotate == -3) {
+				nextCoord.add(new int[] { x, y });
+				nextCoord.add(new int[] { x, y + square });
+				nextCoord.add(new int[] { x + square, y - square });
+				xMin = x;
+				xMax = x + square;
+				yMin = y - square;
+				yMax = y;
+			} else if (rotate == 2 || rotate == -2) {
+				nextCoord.add(new int[] { x + 2 * square, y });
+				nextCoord.add(new int[] { x, y - square });
+				nextCoord.add(new int[] { x + square, y - square });
+				xMin = x;
+				xMax = x + 2 * square;
+				yMin = y - square;
+				yMax = y;
+			} else if (rotate == 3 || rotate == -1) {
+				nextCoord.add(new int[] { x, y + square });
+				nextCoord.add(new int[] { x + square, y });
+				nextCoord.add(new int[] { x + square, y - square });
+				xMin = x;
+				xMax = x + square;
+				yMin = y - square;
+				yMax = y;
+			}
+		}
+
+		void nextPinkTri(int x, int y, int square, int rotate) {
+			nextCoord = new ArrayList<>();
+			if (rotate == 0 || rotate == 2 || rotate == -2) {
+				nextCoord.add(new int[] { x, y });
+				nextCoord.add(new int[] { x + square, y });
+				nextCoord.add(new int[] { x + 2 * square, y });
+				xMin = x;
+				xMax = x + 2 * square;
+				yMin = y;
+				yMax = y;
+			} else {
+				nextCoord.add(new int[] { x + square, y });
+				nextCoord.add(new int[] { x + square, y + square });
+				nextCoord.add(new int[] { x + square, y - square });
+				xMin = x;
+				xMax = x;
+				yMin = y - square;
+				yMax = y + square;
+			}
+		}
+	}
 }
