@@ -72,6 +72,16 @@ public class Tetris_3 extends Frame {
 
 	JSlider speedFactor;
 	JLabel spLabel;
+
+	JSlider heightFactor;
+	JLabel heightLabel;
+
+	JSlider widthFactor;
+	JLabel widthLabel;
+
+	JSlider sizeFactor;
+	JLabel sizeLabel;
+
 	Panel panel;
 
 	public void setPanel() {
@@ -80,7 +90,6 @@ public class Tetris_3 extends Frame {
 		scoringFactor.setMajorTickSpacing(1);
 		scoringFactor.setPaintTicks(true);
 		sfLabel = new JLabel("Scoring Factor: 1");
-
 		scoringFactor.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -92,7 +101,6 @@ public class Tetris_3 extends Frame {
 		levelClimber.setMajorTickSpacing(5);
 		levelClimber.setPaintTicks(true);
 		lcLabel = new JLabel("Lines Removed Required for level up: 20");
-
 		levelClimber.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -104,11 +112,43 @@ public class Tetris_3 extends Frame {
 		speedFactor.setMajorTickSpacing(1);
 		speedFactor.setPaintTicks(true);
 		spLabel = new JLabel("Speed Factor: 0.1");
-
 		speedFactor.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				spLabel.setText(String.valueOf("Speed Factor: " + ((float) speedFactor.getValue() / 10)));
+			}
+		});
+
+		heightFactor = new JSlider(JSlider.HORIZONTAL, 20, 30, 20);
+		heightFactor.setMajorTickSpacing(2);
+		heightFactor.setPaintTicks(true);
+		heightLabel = new JLabel("Current Hight: 20 squares");
+		heightFactor.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				heightLabel.setText(String.valueOf("Current Hight: " + heightFactor.getValue() + " squares"));
+			}
+		});
+
+		widthFactor = new JSlider(JSlider.HORIZONTAL, 10, 20, 10);
+		widthFactor.setMajorTickSpacing(2);
+		widthFactor.setPaintTicks(true);
+		widthLabel = new JLabel("Current width: 10 squares");
+		widthFactor.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				widthLabel.setText(String.valueOf("Current width: " + widthFactor.getValue() + " squares"));
+			}
+		});
+
+		sizeFactor = new JSlider(JSlider.HORIZONTAL, 10, 15, 10);
+		sizeFactor.setMajorTickSpacing(1);
+		sizeFactor.setPaintTicks(true);
+		sizeLabel = new JLabel("Current size: 1X");
+		sizeFactor.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				sizeLabel.setText(String.valueOf("Current size: " + (float) sizeFactor.getValue() / 10 + "X"));
 			}
 		});
 
@@ -119,6 +159,12 @@ public class Tetris_3 extends Frame {
 		panel.add(levelClimber);
 		panel.add(spLabel);
 		panel.add(speedFactor);
+		panel.add(heightLabel);
+		panel.add(heightFactor);
+		panel.add(widthLabel);
+		panel.add(widthFactor);
+		panel.add(sizeLabel);
+		panel.add(sizeFactor);
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 	}
 
@@ -157,6 +203,10 @@ public class Tetris_3 extends Frame {
 		int leftMove = 0;
 		int count = 0;
 		int rotate = 0;
+
+		int height;
+		int width;
+		int size;
 
 		// to determine the coordinates for the cursor
 		int mouse1x, mouse1y, mouse2x, mouse2y;
@@ -212,6 +262,9 @@ public class Tetris_3 extends Frame {
 			M = scoringFactor.getValue();
 			N = levelClimber.getValue();
 			S = ((float) speedFactor.getValue() / 10);
+			width = widthFactor.getValue();
+			height = heightFactor.getValue();
+			size = sizeFactor.getValue();
 		}
 
 		int iX(float x) {
@@ -288,8 +341,8 @@ public class Tetris_3 extends Frame {
 
 					Point2D p = new Point2D(fx(mouse2x), fy(mouse2y));
 
-					if ((mouse2x < iX(xA + square * 10)) && (mouse2x > iX(xA)) && (mouse2y < iY(yA - square * 20))
-							&& (mouse2y > iY(yA))) {
+					if ((mouse2x < iX(xA + square * width)) && (mouse2x > iX(xA))
+							&& (mouse2y < iY(yA - square * height)) && (mouse2y > iY(yA))) {
 						show = true;
 						boolean inside = false;
 						for (int[] coord : nextCoord) {
@@ -338,20 +391,21 @@ public class Tetris_3 extends Frame {
 			timer.start();
 			initgr();
 			prevs = new HashSet<>();
-			square = (float) (minMaxXY / 30); // customarily set the length to be the minMaxXY / 30
+			square = (float) (minMaxXY / (40 - size)); // customarily set the length to be the minMaxXY /
+														// 30
 			removedRows = 0;
 			level = 1;
 			score = 0;
 			// coordinates for the main area
-			xA = (float) xCenter - square * 5;
-			yA = (float) yCenter + square * 10;
+			xA = xCenter - square * (width - 5);
+			yA = yCenter + square * (height - 10);
 
 			// coordinates for the upper right small rectangle
 			xB = (float) xCenter + square * 6;
 			yB = yA;
 
 			// coordinates for the pause button box
-			xC = (float) ((float) xCenter - square * 2.5);
+			xC = xA + (float) (width / 3) * square;
 			yC = (float) yCenter + square;
 			xM = (float) (xC + 0.9 * square);
 			yM = (float) (yC - 1.4 * square);
@@ -376,7 +430,7 @@ public class Tetris_3 extends Frame {
 			yDraw = yCenter + (9 - count) * square;
 
 			// draw all the necessary rectangles
-			g.drawRect(iX(xA), iY(yA), (int) (square * 10), (int) (square * 20));
+			g.drawRect(iX(xA), iY(yA), (int) (square * width), (int) (square * height));
 			g.drawRect(iX(xB), iY(yB), (int) (square * 5), (int) (square * 3));
 			g.drawRect(iX(xK), iY(yK), (int) (square * 4), (int) (square * (float) 1.5));
 
@@ -470,7 +524,7 @@ public class Tetris_3 extends Frame {
 					map.put(square.Y, map.getOrDefault(square.Y, 0) + 1);
 				}
 				for (int Y : map.keySet()) {
-					if (map.get(Y) >= 10) {
+					if (map.get(Y) >= width) {
 						Ys.add(Y);
 						removedRows++;
 					}
@@ -551,8 +605,8 @@ public class Tetris_3 extends Frame {
 
 		// function to check whether the boundary values are inside the mainarea box
 		boolean checkInside() {
-			return (xMin >= xCenter - (int) square * 5 && xMax <= xCenter + (int) square * 4
-					&& yMin >= yCenter - (int) square * 10 && yMax <= yCenter + (int) square * 9);
+			return (xMin >= xCenter - (width - 5) * (int) square && xMax <= xCenter + 4 * (int) square
+					&& yMin >= yCenter - (int) square * (height - 10) && yMax <= yCenter + (int) square * 9);
 		}
 
 		Color getColor(int n) {
@@ -640,7 +694,6 @@ public class Tetris_3 extends Frame {
 			for (int[] coord : nextCoord) {
 				int X = coord[0];
 				int Y = coord[1];
-
 				g.setColor(Color.GREEN);
 				g.fillRect(X, Y, square, square);
 				g.setColor(Color.black);
@@ -654,7 +707,6 @@ public class Tetris_3 extends Frame {
 			for (int[] coord : nextCoord) {
 				int X = coord[0];
 				int Y = coord[1];
-
 				g.setColor(Color.ORANGE);
 				g.fillRect(X, Y, square, square);
 				g.setColor(Color.black);
