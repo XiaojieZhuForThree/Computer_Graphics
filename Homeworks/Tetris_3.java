@@ -143,6 +143,7 @@ public class Tetris_3 extends Frame {
 	}
 
 	class getTetris3 extends Canvas {
+
 		// set the integers for the lengths and center of the canvas
 		int maxX, maxY, minMaxXY, xCenter, yCenter;
 		boolean show = false, update = false, stillIn = false; // to determine if the pause should be shown
@@ -156,11 +157,12 @@ public class Tetris_3 extends Frame {
 		int leftMove = 0;
 		int count = 0;
 		int rotate = 0;
+
 		// to determine the coordinates for the cursor
 		int mouse1x, mouse1y, mouse2x, mouse2y;
 		List<int[]> prevDraws = new ArrayList<>();
 		Set<Square> prevs;
-		// List<Point2D> checkpol;
+
 		// random number generator
 		Random rand = new Random();
 
@@ -266,7 +268,6 @@ public class Tetris_3 extends Frame {
 							rotate = (rotate + 1) % 4;
 							repaint();
 						}
-
 					} else if (event.getWheelRotation() > 0 && !show) {
 						checkValid(n1, xDraw, yDraw, (rotate - 1) % 4);
 						if (!newcheckCoincidence(nextCoord, prevs) && checkInside()) {
@@ -281,8 +282,10 @@ public class Tetris_3 extends Frame {
 			// button
 			addMouseMotionListener(new MouseAdapter() {
 				public void mouseMoved(MouseEvent event) {
+
 					mouse2x = event.getX();
 					mouse2y = event.getY();
+
 					Point2D p = new Point2D(fx(mouse2x), fy(mouse2y));
 
 					if ((mouse2x < iX(xA + square * 10)) && (mouse2x > iX(xA)) && (mouse2y < iY(yA - square * 20))
@@ -295,22 +298,19 @@ public class Tetris_3 extends Frame {
 							fillPoly(X, Y);
 							inside = inside || insidePolygon(p, pol);
 						}
-						if (inside && !stillIn) {
-							// System.out.println(true);
+						if (!inside) {
+							stillIn = false;
+						} else if (inside && !stillIn) {
 							int n3 = rand.nextInt(7);
 							rotate = 0;
 							checkValid(n3, xDraw, yDraw - square, rotate);
-							while (n3 == n1 || n3 == n2 || !checkInside()) {
+							while (n3 == n1 || n3 == n2 || newcheckCoincidence(nextCoord, prevs) || !checkInside()) {
 								n3 = rand.nextInt(7);
 								checkValid(n3, xDraw, yDraw - square, rotate);
 							}
 							n1 = n3;
 							minus += M * level;
 							stillIn = true;
-
-						} else if (!inside && stillIn) {
-							stillIn = false;
-
 						}
 						repaint();
 					} else {
@@ -319,7 +319,6 @@ public class Tetris_3 extends Frame {
 					}
 				}
 			});
-
 		}
 
 		boolean insidePolygon(Point2D p, Point2D[] pol) {
@@ -372,9 +371,9 @@ public class Tetris_3 extends Frame {
 			yL = (float) (yK - 1.1 * square);
 			bottomLine = yCenter - 9 * square;
 
+			// coordinates for the draw place
 			xDraw = xCenter - leftMove * square;
 			yDraw = yCenter + (9 - count) * square;
-			// coordinates for the draw place
 
 			// draw all the necessary rectangles
 			g.drawRect(iX(xA), iY(yA), (int) (square * 10), (int) (square * 20));
@@ -577,9 +576,9 @@ public class Tetris_3 extends Frame {
 		void fillPoly(int X, int Y) {
 			int[][] points = new int[4][2];
 			points[0] = new int[] { X, Y };
-			points[1] = new int[] { X, Y + (int) square };
+			points[1] = new int[] { X + (int) square, Y };
 			points[2] = new int[] { X + (int) square, Y + (int) square };
-			points[3] = new int[] { X + (int) square, Y };
+			points[3] = new int[] { X, Y + (int) square };
 			int i = 0;
 			for (int[] point : points) {
 				pol[i] = new Point2D(fx(point[0]), fy(point[1]));
@@ -668,7 +667,6 @@ public class Tetris_3 extends Frame {
 			for (int[] coord : nextCoord) {
 				int X = coord[0];
 				int Y = coord[1];
-
 				g.setColor(Color.CYAN);
 				g.fillRect(X, Y, square, square);
 				g.setColor(Color.black);
