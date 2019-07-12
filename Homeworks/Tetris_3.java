@@ -307,6 +307,14 @@ public class Tetris_3 extends Frame {
 							leftMove--;
 							repaint();
 						}
+					} else if (event.getButton() == MouseEvent.BUTTON2 && show == false) {
+						checkValid(n1, xDraw, yDraw - square, rotate);
+						boolean coincidence = newcheckCoincidence(nextCoord, prevs);
+						while (!coincidence && newcheckInside()) {
+							count++;
+							checkValid(n1, xDraw, yDraw - (count + 1) * square, rotate);
+							coincidence = newcheckCoincidence(nextCoord, prevs);
+						}
 					}
 				}
 			});
