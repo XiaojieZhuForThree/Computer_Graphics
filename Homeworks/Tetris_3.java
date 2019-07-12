@@ -219,12 +219,10 @@ public class Tetris_3 extends Frame {
 		Point2D[] pol = new Point2D[4];
 
 		// Obtain a number between [0 - 6].
-		int n1 = 7;
-		int n2 = 7;
+		int n1 = rand.nextInt(10);
+		int n2 = rand.nextInt(10);
 		float delay = 700F;
-		int xMin, xMax, yMin, yMax;
-		List<int[]> nextCoord = new ArrayList<>();
-
+		List<Square> nextCoord = new ArrayList<>();
 		int score = 0, minus = 0, M, N;
 		int level = 1, previousLevel = 1;
 		int removedRows = 0;
@@ -236,10 +234,10 @@ public class Tetris_3 extends Frame {
 				// TODO Auto-generated method stub
 				checkValid(n1, xDraw, yDraw - square, rotate);
 				boolean coincidence = newcheckCoincidence(nextCoord, prevs);
-				if (!coincidence && checkInside() && !show) {
+				if (!coincidence && newcheckInside() && !show) {
 					count += 1;
 					repaint();
-				} else if ((coincidence || !checkInside()) && !show) {
+				} else if ((coincidence || !newcheckInside()) && !show) {
 					prevDraws.add(new int[] { n1, count, leftMove, rotate });
 					n1 = n2;
 					n2 = rand.nextInt(10);
@@ -299,13 +297,13 @@ public class Tetris_3 extends Frame {
 				public void mouseClicked(MouseEvent event) {
 					if (event.getButton() == MouseEvent.BUTTON1 && show == false) {
 						checkValid(n1, xDraw - square, yDraw, rotate);
-						if (!newcheckCoincidence(nextCoord, prevs) && checkInside()) {
+						if (!newcheckCoincidence(nextCoord, prevs) && newcheckInside()) {
 							leftMove++;
 							repaint();
 						}
 					} else if (event.getButton() == MouseEvent.BUTTON3 && show == false) {
 						checkValid(n1, xDraw + square, yDraw, rotate);
-						if (!newcheckCoincidence(nextCoord, prevs) && checkInside()) {
+						if (!newcheckCoincidence(nextCoord, prevs) && newcheckInside()) {
 							leftMove--;
 							repaint();
 						}
@@ -317,13 +315,13 @@ public class Tetris_3 extends Frame {
 				public void mouseWheelMoved(MouseWheelEvent event) {
 					if (event.getWheelRotation() < 0 && !show) {
 						checkValid(n1, xDraw, yDraw, (rotate + 1) % 4);
-						if (!newcheckCoincidence(nextCoord, prevs) && checkInside()) {
+						if (!newcheckCoincidence(nextCoord, prevs) && newcheckInside()) {
 							rotate = (rotate + 1) % 4;
 							repaint();
 						}
 					} else if (event.getWheelRotation() > 0 && !show) {
 						checkValid(n1, xDraw, yDraw, (rotate - 1) % 4);
-						if (!newcheckCoincidence(nextCoord, prevs) && checkInside()) {
+						if (!newcheckCoincidence(nextCoord, prevs) && newcheckInside()) {
 							rotate = (rotate - 1) % 4;
 							repaint();
 						}
@@ -345,9 +343,9 @@ public class Tetris_3 extends Frame {
 							&& (mouse2y < iY(yA - square * height)) && (mouse2y > iY(yA))) {
 						show = true;
 						boolean inside = false;
-						for (int[] coord : nextCoord) {
-							int X = coord[0];
-							int Y = coord[1];
+						for (Square coord : nextCoord) {
+							int X = coord.X;
+							int Y = coord.Y;
 							fillPoly(X, Y);
 							inside = inside || insidePolygon(p, pol);
 						}
@@ -357,7 +355,7 @@ public class Tetris_3 extends Frame {
 							int n3 = rand.nextInt(10);
 							rotate = 0;
 							checkValid(n3, xDraw, yDraw - square, rotate);
-							while (n3 == n1 || n3 == n2 || newcheckCoincidence(nextCoord, prevs) || !checkInside()) {
+							while (n3 == n1 || n3 == n2 || newcheckCoincidence(nextCoord, prevs) || !newcheckInside()) {
 								n3 = rand.nextInt(10);
 								checkValid(n3, xDraw, yDraw - square, rotate);
 							}
@@ -517,8 +515,8 @@ public class Tetris_3 extends Frame {
 		// function to store the coordinates of previous fixed drawn squares
 
 		void newLeaveMarks(int n) {
-			for (int[] vertex : nextCoord) {
-				prevs.add(new Square(vertex[0], vertex[1], getColor(n)));
+			for (Square vertex : nextCoord) {
+				prevs.add(new Square(vertex.X, vertex.Y, vertex.color));
 			}
 		}
 
@@ -551,68 +549,51 @@ public class Tetris_3 extends Frame {
 				}
 				prevs = newSet;
 			}
-
 		}
 
 		// function to draw the current moving shape
 		void drawMoveShapes(Graphics g, int n1, float xDraw, float yDraw, int rotate) {
-
-			if (n1 == 0) {
-				drawYellowWedge(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
-			} else if (n1 == 1) {
-				drawPurpleReverseWedge(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
-			} else if (n1 == 2) {
-				drawBlueReverseL(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
-			} else if (n1 == 3) {
-				drawRedReverseL(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
-			} else if (n1 == 4) {
-				drawGreenCube(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
-			} else if (n1 == 5) {
-				drawOrangeHill(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
-			} else if (n1 == 6) {
-				drawCyanBar(g, iX(xDraw - 2 * square), iY(yDraw + square), (int) square, rotate);
-			} else if (n1 == 7) {
-				drawGrayTri(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
-			} else if (n1 == 8) {
-				drawGrassTri(g, iX(xDraw - square), iY(yDraw), (int) square, rotate);
-			} else {
-				drawPinkTri(g, iX(xDraw - square), iY(yDraw + square), (int) square, rotate);
+			checkValid(n1, xDraw, yDraw, rotate);
+			for (Square i : nextCoord) {
+				drawSquare(g, i);
 			}
-
 		}
 
 		// function to draw the next shape in the fixed next shape box
 		void drawStableShapes(Graphics g, int n2) {
 			if (n2 == 0) {
-				drawYellowWedge(g, iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
+				nextYellowWedge(iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
 			} else if (n2 == 1) {
-				drawPurpleReverseWedge(g, iX(xB + 2F * square), iY(yB - 1.5F * square), (int) square, 0);
+				nextPurpleReverseWedge(iX(xB + 2F * square), iY(yB - 1.5F * square), (int) square, 0);
 			} else if (n2 == 2) {
-				drawBlueReverseL(g, iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
+				nextBlueReverseL(iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
 			} else if (n2 == 3) {
-				drawRedReverseL(g, iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
+				nextRedReverseL(iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
 			} else if (n2 == 4) {
-				drawGreenCube(g, iX(xB + 1.5F * square), iY(yB - 1.5F * square), (int) square, 0);
+				nextGreenCube(iX(xB + 1.5F * square), iY(yB - 1.5F * square), (int) square, 0);
 			} else if (n2 == 5) {
-				drawOrangeHill(g, iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
+				nextOrangeHill(iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
 			} else if (n2 == 6) {
-				drawCyanBar(g, iX(xB + 0.5F * square), iY(yB - square), (int) square, 0);
+				nextCyanBar(iX(xB + 0.5F * square), iY(yB - square), (int) square, 0);
 			} else if (n2 == 7) {
-				drawGrayTri(g, iX(xB + 1.5F * square), iY(yB - 1.5F * square), (int) square, 0);
+				nextGrayTri(iX(xB + 1.5F * square), iY(yB - 1.5F * square), (int) square, 0);
 			} else if (n2 == 8) {
-				drawGrassTri(g, iX(xB + 1.5F * square), iY(yB - 1.5F * square), (int) square, 0);
+				nextGrassTri(iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
 			} else {
-				drawPinkTri(g, iX(xB + 1.5F * square), iY(yB - square), (int) square, 0);
+				nextPinkTri(iX(xB + square), iY(yB - square), (int) square, 0);
+			}
+			for (Square i : nextCoord) {
+				drawSquare(g, i);
 			}
 		}
 
 		// function to detect if the collision occurs
 
-		boolean newcheckCoincidence(List<int[]> vertices, Set<Square> prevs) {
+		boolean newcheckCoincidence(List<Square> vertices, Set<Square> prevs) {
 			boolean coincidence = false;
-			for (int[] coord : vertices) {
+			for (Square cur : vertices) {
 				for (Square prev : prevs) {
-					if (coord[0] == prev.X && coord[1] == prev.Y) {
+					if (cur.X == prev.X && cur.Y == prev.Y) {
 						coincidence = true;
 						break;
 					}
@@ -622,9 +603,16 @@ public class Tetris_3 extends Frame {
 		}
 
 		// function to check whether the boundary values are inside the mainarea box
-		boolean checkInside() {
-			return (xMin >= xCenter - (width - 5) * (int) square && xMax <= xCenter + 4 * (int) square
-					&& yMin >= yCenter - (int) square * (height - 10) && yMax <= yCenter + (int) square * 9);
+		boolean newcheckInside() {
+			boolean isInside = true;
+			for (Square i : nextCoord) {
+				int x = i.X;
+				int y = i.Y;
+				isInside = isInside && (x >= xCenter - (width - 5) * (int) square
+						&& x + (int) square <= xCenter + 5 * (int) square && y >= yCenter - (int) square * (height - 10)
+						&& y + (int) square <= yCenter + (int) square * 10);
+			}
+			return isInside;
 		}
 
 		Color getColor(int n) {
@@ -664,129 +652,6 @@ public class Tetris_3 extends Frame {
 			}
 		}
 
-		// functions to draw all the shapes
-		void drawYellowWedge(Graphics g, int x, int y, int square, int rotate) {
-			nextYellowWedge(x, y, square, rotate);
-			for (int[] coord : nextCoord) {
-				int X = coord[0];
-				int Y = coord[1];
-				g.setColor(Color.YELLOW);
-				g.fillRect(X, Y, square, square);
-				g.setColor(Color.black);
-				g.drawRect(X, Y, square, square);
-			}
-		}
-
-		void drawPurpleReverseWedge(Graphics g, int x, int y, int square, int rotate) {
-			nextPurpleReverseWedge(x, y, square, rotate);
-			for (int[] coord : nextCoord) {
-				int X = coord[0];
-				int Y = coord[1];
-				g.setColor(Color.MAGENTA);
-				g.fillRect(X, Y, square, square);
-				g.setColor(Color.black);
-				g.drawRect(X, Y, square, square);
-			}
-		}
-
-		void drawBlueReverseL(Graphics g, int x, int y, int square, int rotate) {
-			nextBlueReverseL(x, y, square, rotate);
-			for (int[] coord : nextCoord) {
-				int X = coord[0];
-				int Y = coord[1];
-				g.setColor(Color.BLUE);
-				g.fillRect(X, Y, square, square);
-				g.setColor(Color.black);
-				g.drawRect(X, Y, square, square);
-			}
-		}
-
-		void drawRedReverseL(Graphics g, int x, int y, int square, int rotate) {
-			nextRedReverseL(x, y, square, rotate);
-			for (int[] coord : nextCoord) {
-				int X = coord[0];
-				int Y = coord[1];
-				g.setColor(Color.RED);
-				g.fillRect(X, Y, square, square);
-				g.setColor(Color.black);
-				g.drawRect(X, Y, square, square);
-			}
-		}
-
-		void drawGreenCube(Graphics g, int x, int y, int square, int rotate) {
-			nextGreenCube(x, y, square, rotate);
-			for (int[] coord : nextCoord) {
-				int X = coord[0];
-				int Y = coord[1];
-				g.setColor(Color.GREEN);
-				g.fillRect(X, Y, square, square);
-				g.setColor(Color.black);
-				g.drawRect(X, Y, square, square);
-
-			}
-		}
-
-		void drawOrangeHill(Graphics g, int x, int y, int square, int rotate) {
-			nextOrangeHill(x, y, square, rotate);
-			for (int[] coord : nextCoord) {
-				int X = coord[0];
-				int Y = coord[1];
-				g.setColor(Color.ORANGE);
-				g.fillRect(X, Y, square, square);
-				g.setColor(Color.black);
-				g.drawRect(X, Y, square, square);
-			}
-		}
-
-		void drawCyanBar(Graphics g, int x, int y, int square, int rotate) {
-			nextCyanBar(x, y, square, rotate);
-			for (int[] coord : nextCoord) {
-				int X = coord[0];
-				int Y = coord[1];
-				g.setColor(Color.CYAN);
-				g.fillRect(X, Y, square, square);
-				g.setColor(Color.black);
-				g.drawRect(X, Y, square, square);
-
-			}
-		}
-
-		void drawGrayTri(Graphics g, int x, int y, int square, int rotate) {
-			nextGrayTri(x, y, square, rotate);
-			for (int[] coord : nextCoord) {
-				int X = coord[0];
-				int Y = coord[1];
-				g.setColor(Color.GRAY);
-				g.fillRect(X, Y, square, square);
-				g.setColor(Color.black);
-				g.drawRect(X, Y, square, square);
-			}
-		}
-
-		void drawGrassTri(Graphics g, int x, int y, int square, int rotate) {
-			nextGrassTri(x, y, square, rotate);
-			for (int[] coord : nextCoord) {
-				int X = coord[0];
-				int Y = coord[1];
-				g.setColor(new Color(0xb7, 0xe1, 0xa1));
-				g.fillRect(X, Y, square, square);
-				g.setColor(Color.black);
-				g.drawRect(X, Y, square, square);
-			}
-		}
-
-		void drawPinkTri(Graphics g, int x, int y, int square, int rotate) {
-			nextPinkTri(x, y, square, rotate);
-			for (int[] coord : nextCoord) {
-				int X = coord[0];
-				int Y = coord[1];
-				g.setColor(Color.PINK);
-				g.fillRect(X, Y, square, square);
-				g.setColor(Color.black);
-				g.drawRect(X, Y, square, square);
-			}
-		}
-
 		void drawSquare(Graphics g, Square cube) {
 			g.setColor(cube.color);
 			g.fillRect(cube.X, cube.Y, (int) square, (int) square);
@@ -799,299 +664,212 @@ public class Tetris_3 extends Frame {
 		void nextYellowWedge(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
 			if (rotate == 0 || rotate == 2 || rotate == -2) {
-				nextCoord.add(new int[] { x, y });
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x + square, y - square });
-				nextCoord.add(new int[] { x + 2 * square, y - square });
-				xMin = x;
-				xMax = x + 2 * square;
-				yMin = y - square;
-				yMax = y;
+				nextCoord.add(new Square(x, y, Color.YELLOW));
+				nextCoord.add(new Square(x + square, y, Color.YELLOW));
+				nextCoord.add(new Square(x + square, y - square, Color.YELLOW));
+				nextCoord.add(new Square(x + 2 * square, y - square, Color.YELLOW));
+
 			} else if (rotate == 1 || rotate == 3 || rotate == -3 || rotate == -1) {
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x + square, y - square });
-				nextCoord.add(new int[] { x, y - square });
-				nextCoord.add(new int[] { x, y - 2 * square });
-				xMin = x;
-				xMax = x + square;
-				yMin = y - 2 * square;
-				yMax = y;
+				nextCoord.add(new Square(x + square, y, Color.YELLOW));
+				nextCoord.add(new Square(x + square, y - square, Color.YELLOW));
+				nextCoord.add(new Square(x, y - square, Color.YELLOW));
+				nextCoord.add(new Square(x, y - 2 * square, Color.YELLOW));
+
 			}
 		}
 
 		void nextPurpleReverseWedge(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
 			if (rotate == 0 || rotate == 2 || rotate == -2) {
-				nextCoord.add(new int[] { x, y });
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x, y - square });
-				nextCoord.add(new int[] { x - square, y - square });
-				xMin = x - square;
-				xMax = x + square;
-				yMin = y - square;
-				yMax = y;
+				nextCoord.add(new Square(x, y, Color.MAGENTA));
+				nextCoord.add(new Square(x + square, y, Color.MAGENTA));
+				nextCoord.add(new Square(x, y - square, Color.MAGENTA));
+				nextCoord.add(new Square(x - square, y - square, Color.MAGENTA));
+
 			} else if (rotate == 1 || rotate == 3 || rotate == -3 || rotate == -1) {
-				nextCoord.add(new int[] { x, y });
-				nextCoord.add(new int[] { x, y - square });
-				nextCoord.add(new int[] { x + square, y - square });
-				nextCoord.add(new int[] { x + square, y - 2 * square });
-				xMin = x;
-				xMax = x + square;
-				yMin = y - 2 * square;
-				yMax = y;
+				nextCoord.add(new Square(x, y, Color.MAGENTA));
+				nextCoord.add(new Square(x, y - square, Color.MAGENTA));
+				nextCoord.add(new Square(x + square, y - square, Color.MAGENTA));
+				nextCoord.add(new Square(x + square, y - 2 * square, Color.MAGENTA));
+
 			}
 		}
 
 		void nextBlueReverseL(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
 			if (rotate == 0) {
-				nextCoord.add(new int[] { x, y - square });
-				nextCoord.add(new int[] { x, y });
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x + 2 * square, y });
-				xMin = x;
-				xMax = x + 2 * square;
-				yMin = y - square;
-				yMax = y;
+				nextCoord.add(new Square(x, y - square, Color.BLUE));
+				nextCoord.add(new Square(x, y, Color.BLUE));
+				nextCoord.add(new Square(x + square, y, Color.BLUE));
+				nextCoord.add(new Square(x + 2 * square, y, Color.BLUE));
+
 			} else if (rotate == 1 || rotate == -3) {
-				nextCoord.add(new int[] { x, y });
-				nextCoord.add(new int[] { x, y - square });
-				nextCoord.add(new int[] { x, y - 2 * square });
-				nextCoord.add(new int[] { x + square, y - 2 * square });
-				xMin = x;
-				xMax = x + square;
-				yMin = y - 2 * square;
-				yMax = y;
+				nextCoord.add(new Square(x, y, Color.BLUE));
+				nextCoord.add(new Square(x, y - square, Color.BLUE));
+				nextCoord.add(new Square(x, y - 2 * square, Color.BLUE));
+				nextCoord.add(new Square(x + square, y - 2 * square, Color.BLUE));
+
 			} else if (rotate == 2 || rotate == -2) {
-				nextCoord.add(new int[] { x + 2 * square, y });
-				nextCoord.add(new int[] { x + 2 * square, y - square });
-				nextCoord.add(new int[] { x + square, y - square });
-				nextCoord.add(new int[] { x, y - square });
-				xMin = x;
-				xMax = x + 2 * square;
-				yMin = y - square;
-				yMax = y;
+				nextCoord.add(new Square(x + 2 * square, y, Color.BLUE));
+				nextCoord.add(new Square(x + 2 * square, y - square, Color.BLUE));
+				nextCoord.add(new Square(x + square, y - square, Color.BLUE));
+				nextCoord.add(new Square(x, y - square, Color.BLUE));
+
 			} else if (rotate == 3 || rotate == -1) {
-				nextCoord.add(new int[] { x, y });
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x + square, y - square });
-				nextCoord.add(new int[] { x + square, y - 2 * square });
-				xMin = x;
-				xMax = x + square;
-				yMin = y - 2 * square;
-				yMax = y;
+				nextCoord.add(new Square(x, y, Color.BLUE));
+				nextCoord.add(new Square(x + square, y, Color.BLUE));
+				nextCoord.add(new Square(x + square, y - square, Color.BLUE));
+				nextCoord.add(new Square(x + square, y - 2 * square, Color.BLUE));
+
 			}
 		}
 
 		void nextRedReverseL(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
 			if (rotate == 0) {
-				nextCoord.add(new int[] { x, y });
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x + 2 * square, y });
-				nextCoord.add(new int[] { x + 2 * square, y - square });
-				xMin = x;
-				xMax = x + 2 * square;
-				yMin = y - square;
-				yMax = y;
+				nextCoord.add(new Square(x, y, Color.RED));
+				nextCoord.add(new Square(x + square, y, Color.RED));
+				nextCoord.add(new Square(x + 2 * square, y, Color.RED));
+				nextCoord.add(new Square(x + 2 * square, y - square, Color.RED));
+
 			} else if (rotate == 1 || rotate == -3) {
-				nextCoord.add(new int[] { x, y });
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x, y - square });
-				nextCoord.add(new int[] { x, y - 2 * square });
-				xMin = x;
-				xMax = x + square;
-				yMin = y - 2 * square;
-				yMax = y;
+				nextCoord.add(new Square(x, y, Color.RED));
+				nextCoord.add(new Square(x + square, y, Color.RED));
+				nextCoord.add(new Square(x, y - square, Color.RED));
+				nextCoord.add(new Square(x, y - 2 * square, Color.RED));
+
 			} else if (rotate == 2 || rotate == -2) {
-				nextCoord.add(new int[] { x, y });
-				nextCoord.add(new int[] { x, y - square });
-				nextCoord.add(new int[] { x + square, y - square });
-				nextCoord.add(new int[] { x + 2 * square, y - square });
-				xMin = x;
-				xMax = x + 2 * square;
-				yMin = y - square;
-				yMax = y;
+				nextCoord.add(new Square(x, y, Color.RED));
+				nextCoord.add(new Square(x, y - square, Color.RED));
+				nextCoord.add(new Square(x + square, y - square, Color.RED));
+				nextCoord.add(new Square(x + 2 * square, y - square, Color.RED));
+
 			} else if (rotate == 3 || rotate == -1) {
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x + square, y - square });
-				nextCoord.add(new int[] { x + square, y - 2 * square });
-				nextCoord.add(new int[] { x, y - 2 * square });
-				xMin = x;
-				xMax = x + square;
-				yMin = y - 2 * square;
-				yMax = y;
+				nextCoord.add(new Square(x + square, y, Color.RED));
+				nextCoord.add(new Square(x + square, y - square, Color.RED));
+				nextCoord.add(new Square(x + square, y - 2 * square, Color.RED));
+				nextCoord.add(new Square(x, y - 2 * square, Color.RED));
+
 			}
 		}
 
 		void nextGreenCube(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
-			nextCoord.add(new int[] { x, y });
-			nextCoord.add(new int[] { x + square, y });
-			nextCoord.add(new int[] { x + square, y - square });
-			nextCoord.add(new int[] { x, y - square });
-			xMin = x;
-			xMax = x + square;
-			yMin = y - square;
-			yMax = y;
+			nextCoord.add(new Square(x, y, Color.GREEN));
+			nextCoord.add(new Square(x + square, y, Color.GREEN));
+			nextCoord.add(new Square(x + square, y - square, Color.GREEN));
+			nextCoord.add(new Square(x, y - square, Color.GREEN));
+
 		}
 
 		void nextOrangeHill(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
 			if (rotate == 0) {
-				nextCoord.add(new int[] { x, y });
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x + square, y - square });
-				nextCoord.add(new int[] { x + 2 * square, y });
-				xMin = x;
-				xMax = x + 2 * square;
-				yMin = y - square;
-				yMax = y;
+				nextCoord.add(new Square(x, y, Color.ORANGE));
+				nextCoord.add(new Square(x + square, y, Color.ORANGE));
+				nextCoord.add(new Square(x + square, y - square, Color.ORANGE));
+				nextCoord.add(new Square(x + 2 * square, y, Color.ORANGE));
+
 			} else if (rotate == 1 || rotate == -3) {
-				nextCoord.add(new int[] { x, y });
-				nextCoord.add(new int[] { x, y - square });
-				nextCoord.add(new int[] { x + square, y - square });
-				nextCoord.add(new int[] { x, y - 2 * square });
-				xMin = x;
-				xMax = x + square;
-				yMin = y - 2 * square;
-				yMax = y;
+				nextCoord.add(new Square(x, y, Color.ORANGE));
+				nextCoord.add(new Square(x, y - square, Color.ORANGE));
+				nextCoord.add(new Square(x + square, y - square, Color.ORANGE));
+				nextCoord.add(new Square(x, y - 2 * square, Color.ORANGE));
+
 			} else if (rotate == 2 || rotate == -2) {
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x + square, y - square });
-				nextCoord.add(new int[] { x, y - square });
-				nextCoord.add(new int[] { x + 2 * square, y - square });
-				xMin = x;
-				xMax = x + 2 * square;
-				yMin = y - square;
-				yMax = y;
+				nextCoord.add(new Square(x + square, y, Color.ORANGE));
+				nextCoord.add(new Square(x + square, y - square, Color.ORANGE));
+				nextCoord.add(new Square(x, y - square, Color.ORANGE));
+				nextCoord.add(new Square(x + 2 * square, y - square, Color.ORANGE));
+
 			} else if (rotate == 3 || rotate == -1) {
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x + square, y - square });
-				nextCoord.add(new int[] { x, y - square });
-				nextCoord.add(new int[] { x + square, y - 2 * square });
-				xMin = x;
-				xMax = x + square;
-				yMin = y - 2 * square;
-				yMax = y;
+				nextCoord.add(new Square(x + square, y, Color.ORANGE));
+				nextCoord.add(new Square(x + square, y - square, Color.ORANGE));
+				nextCoord.add(new Square(x, y - square, Color.ORANGE));
+				nextCoord.add(new Square(x + square, y - 2 * square, Color.ORANGE));
+
 			}
 		}
 
 		void nextCyanBar(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
 			if (rotate == 0 || rotate == 2 || rotate == -2) {
-				nextCoord.add(new int[] { x, y });
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x + 2 * square, y });
-				nextCoord.add(new int[] { x + 3 * square, y });
-				xMin = x;
-				xMax = x + 3 * square;
-				yMin = y;
-				yMax = y;
+				nextCoord.add(new Square(x, y, Color.CYAN));
+				nextCoord.add(new Square(x + square, y, Color.CYAN));
+				nextCoord.add(new Square(x + 2 * square, y, Color.CYAN));
+				nextCoord.add(new Square(x + 3 * square, y, Color.CYAN));
+
 			} else if (rotate == 1 || rotate == 3 || rotate == -1 || rotate == -3) {
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x + square, y + square });
-				nextCoord.add(new int[] { x + square, y + 2 * square });
-				nextCoord.add(new int[] { x + square, y + 3 * square });
-				xMin = x + square;
-				xMax = x + square;
-				yMin = y;
-				yMax = y + 3 * square;
+				nextCoord.add(new Square(x + square, y, Color.CYAN));
+				nextCoord.add(new Square(x + square, y + square, Color.CYAN));
+				nextCoord.add(new Square(x + square, y + 2 * square, Color.CYAN));
+				nextCoord.add(new Square(x + square, y + 3 * square, Color.CYAN));
+
 			}
 		}
 
 		void nextGrayTri(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
 			if (rotate == 0) {
-				nextCoord.add(new int[] { x, y });
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x + square, y - square });
-				xMin = x;
-				xMax = x + square;
-				yMin = y - square;
-				yMax = y;
+				nextCoord.add(new Square(x, y, Color.GRAY));
+				nextCoord.add(new Square(x + square, y, Color.GRAY));
+				nextCoord.add(new Square(x + square, y - square, Color.GRAY));
+
 			} else if (rotate == 1 || rotate == -3) {
-				nextCoord.add(new int[] { x, y });
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x, y - square });
-				xMin = x;
-				xMax = x + square;
-				yMin = y - square;
-				yMax = y;
+				nextCoord.add(new Square(x, y, Color.GRAY));
+				nextCoord.add(new Square(x + square, y, Color.GRAY));
+				nextCoord.add(new Square(x, y - square, Color.GRAY));
+
 			} else if (rotate == 2 || rotate == -2) {
-				nextCoord.add(new int[] { x, y });
-				nextCoord.add(new int[] { x, y - square });
-				nextCoord.add(new int[] { x + square, y - square });
-				xMin = x;
-				xMax = x + square;
-				yMin = y - square;
-				yMax = y;
+				nextCoord.add(new Square(x, y, Color.GRAY));
+				nextCoord.add(new Square(x, y - square, Color.GRAY));
+				nextCoord.add(new Square(x + square, y - square, Color.GRAY));
+
 			} else if (rotate == 3 || rotate == -1) {
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x + square, y - square });
-				nextCoord.add(new int[] { x, y - square });
-				xMin = x;
-				xMax = x + square;
-				yMin = y - square;
-				yMax = y;
+				nextCoord.add(new Square(x + square, y, Color.GRAY));
+				nextCoord.add(new Square(x + square, y - square, Color.GRAY));
+				nextCoord.add(new Square(x, y - square, Color.GRAY));
+
 			}
 		}
 
 		void nextGrassTri(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
 			if (rotate == 0) {
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x + 2 * square, y });
-				nextCoord.add(new int[] { x, y - square });
-				xMin = x;
-				xMax = x + 2 * square;
-				yMin = y - square;
-				yMax = y;
+				nextCoord.add(new Square(x + square, y, new Color(0xb7, 0xe1, 0xa1)));
+				nextCoord.add(new Square(x + 2 * square, y, new Color(0xb7, 0xe1, 0xa1)));
+				nextCoord.add(new Square(x, y - square, new Color(0xb7, 0xe1, 0xa1)));
+
 			} else if (rotate == 1 || rotate == -3) {
-				nextCoord.add(new int[] { x, y });
-				nextCoord.add(new int[] { x, y + square });
-				nextCoord.add(new int[] { x + square, y - square });
-				xMin = x;
-				xMax = x + square;
-				yMin = y - square;
-				yMax = y;
+				nextCoord.add(new Square(x, y, new Color(0xb7, 0xe1, 0xa1)));
+				nextCoord.add(new Square(x, y + square, new Color(0xb7, 0xe1, 0xa1)));
+				nextCoord.add(new Square(x + square, y - square, new Color(0xb7, 0xe1, 0xa1)));
+
 			} else if (rotate == 2 || rotate == -2) {
-				nextCoord.add(new int[] { x + 2 * square, y });
-				nextCoord.add(new int[] { x, y - square });
-				nextCoord.add(new int[] { x + square, y - square });
-				xMin = x;
-				xMax = x + 2 * square;
-				yMin = y - square;
-				yMax = y;
+				nextCoord.add(new Square(x + 2 * square, y, new Color(0xb7, 0xe1, 0xa1)));
+				nextCoord.add(new Square(x, y - square, new Color(0xb7, 0xe1, 0xa1)));
+				nextCoord.add(new Square(x + square, y - square, new Color(0xb7, 0xe1, 0xa1)));
+
 			} else if (rotate == 3 || rotate == -1) {
-				nextCoord.add(new int[] { x, y + square });
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x + square, y - square });
-				xMin = x;
-				xMax = x + square;
-				yMin = y - square;
-				yMax = y;
+				nextCoord.add(new Square(x, y + square, new Color(0xb7, 0xe1, 0xa1)));
+				nextCoord.add(new Square(x + square, y, new Color(0xb7, 0xe1, 0xa1)));
+				nextCoord.add(new Square(x + square, y - square, new Color(0xb7, 0xe1, 0xa1)));
+
 			}
 		}
 
 		void nextPinkTri(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
 			if (rotate == 0 || rotate == 2 || rotate == -2) {
-				nextCoord.add(new int[] { x, y });
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x + 2 * square, y });
-				xMin = x;
-				xMax = x + 2 * square;
-				yMin = y;
-				yMax = y;
+				nextCoord.add(new Square(x, y, Color.PINK));
+				nextCoord.add(new Square(x + square, y, Color.PINK));
+				nextCoord.add(new Square(x + 2 * square, y, Color.PINK));
+
 			} else {
-				nextCoord.add(new int[] { x + square, y });
-				nextCoord.add(new int[] { x + square, y + square });
-				nextCoord.add(new int[] { x + square, y - square });
-				xMin = x;
-				xMax = x;
-				yMin = y - square;
-				yMax = y + square;
+				nextCoord.add(new Square(x + square, y, Color.PINK));
+				nextCoord.add(new Square(x + square, y + square, Color.PINK));
+				nextCoord.add(new Square(x + square, y - square, Color.PINK));
+
 			}
 		}
 	}
