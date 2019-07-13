@@ -688,7 +688,7 @@ public class Tetris_3 extends Frame {
 				nextCoord.add(new Square(x + square, y, Color.YELLOW));
 				nextCoord.add(new Square(x + square, y - square, Color.YELLOW));
 				nextCoord.add(new Square(x + 2 * square, y - square, Color.YELLOW));
-			} else if (rotate == 1 || rotate == 3 || rotate == -3 || rotate == -1) {
+			} else {
 				nextCoord.add(new Square(x + square, y, Color.YELLOW));
 				nextCoord.add(new Square(x + square, y - square, Color.YELLOW));
 				nextCoord.add(new Square(x, y - square, Color.YELLOW));
@@ -734,7 +734,7 @@ public class Tetris_3 extends Frame {
 				nextCoord.add(new Square(x + square, y - square, Color.BLUE));
 				nextCoord.add(new Square(x, y - square, Color.BLUE));
 
-			} else if (rotate == 3 || rotate == -1) {
+			} else {
 				nextCoord.add(new Square(x, y, Color.BLUE));
 				nextCoord.add(new Square(x + square, y, Color.BLUE));
 				nextCoord.add(new Square(x + square, y - square, Color.BLUE));
@@ -763,7 +763,7 @@ public class Tetris_3 extends Frame {
 				nextCoord.add(new Square(x + square, y - square, Color.RED));
 				nextCoord.add(new Square(x + 2 * square, y - square, Color.RED));
 
-			} else if (rotate == 3 || rotate == -1) {
+			} else {
 				nextCoord.add(new Square(x + square, y, Color.RED));
 				nextCoord.add(new Square(x + square, y - square, Color.RED));
 				nextCoord.add(new Square(x + square, y - 2 * square, Color.RED));
@@ -801,7 +801,7 @@ public class Tetris_3 extends Frame {
 				nextCoord.add(new Square(x, y - square, Color.ORANGE));
 				nextCoord.add(new Square(x + 2 * square, y - square, Color.ORANGE));
 
-			} else if (rotate == 3 || rotate == -1) {
+			} else {
 				nextCoord.add(new Square(x + square, y, Color.ORANGE));
 				nextCoord.add(new Square(x + square, y - square, Color.ORANGE));
 				nextCoord.add(new Square(x, y - square, Color.ORANGE));
@@ -818,7 +818,7 @@ public class Tetris_3 extends Frame {
 				nextCoord.add(new Square(x + 2 * square, y, Color.CYAN));
 				nextCoord.add(new Square(x + 3 * square, y, Color.CYAN));
 
-			} else if (rotate == 1 || rotate == 3 || rotate == -1 || rotate == -3) {
+			} else {
 				nextCoord.add(new Square(x + square, y, Color.CYAN));
 				nextCoord.add(new Square(x + square, y + square, Color.CYAN));
 				nextCoord.add(new Square(x + square, y + 2 * square, Color.CYAN));
@@ -844,7 +844,7 @@ public class Tetris_3 extends Frame {
 				nextCoord.add(new Square(x, y - square, Color.GRAY));
 				nextCoord.add(new Square(x + square, y - square, Color.GRAY));
 
-			} else if (rotate == 3 || rotate == -1) {
+			} else {
 				nextCoord.add(new Square(x + square, y, Color.GRAY));
 				nextCoord.add(new Square(x + square, y - square, Color.GRAY));
 				nextCoord.add(new Square(x, y - square, Color.GRAY));
@@ -869,7 +869,7 @@ public class Tetris_3 extends Frame {
 				nextCoord.add(new Square(x, y - square, new Color(0xb7, 0xe1, 0xa1)));
 				nextCoord.add(new Square(x + square, y - square, new Color(0xb7, 0xe1, 0xa1)));
 
-			} else if (rotate == 3 || rotate == -1) {
+			} else {
 				nextCoord.add(new Square(x, y + square, new Color(0xb7, 0xe1, 0xa1)));
 				nextCoord.add(new Square(x + square, y, new Color(0xb7, 0xe1, 0xa1)));
 				nextCoord.add(new Square(x + square, y - square, new Color(0xb7, 0xe1, 0xa1)));
