@@ -11,6 +11,8 @@ import java.awt.Graphics;
 import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -20,12 +22,15 @@ import java.util.*;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import Tetris.Tetris_3.getTetris3;
 
 class Square {
 	int X, Y;
@@ -86,8 +91,25 @@ public class Tetris_3 extends Frame {
 	JButton startButton;
 	Panel panel;
 
+	int fixedSF = 1, fixedLC = 20, fixedSpeed = 1, fixedHF = 20, fixedWF = 10, fixedSize = 10;
+
+	boolean start = false;
+	getTetris3 tetris;
+
+	Set<Integer> pool = new HashSet<>();
+	List<Integer> selectPool = new ArrayList<>();
+
 	public void setPanel() {
 		startButton = new JButton("Start the Game After Setup");
+		startButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				start = true;
+				tetris.repaint();
+			}
+		});
+
 		scoringFactor = new JSlider(JSlider.HORIZONTAL, 1, 10, 1);
 		scoringFactor.setMajorTickSpacing(1);
 		scoringFactor.setPaintTicks(true);
@@ -95,18 +117,32 @@ public class Tetris_3 extends Frame {
 		scoringFactor.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				sfLabel.setText(String.valueOf("Scoring Factor: " + scoringFactor.getValue()));
+				if (start) {
+					scoringFactor.setValue(fixedSF);
+				} else {
+					sfLabel.setText(String.valueOf("Scoring Factor: " + scoringFactor.getValue()));
+					fixedSF = scoringFactor.getValue();
+					tetris.repaint();
+				}
+
 			}
 		});
 
-		levelClimber = new JSlider(JSlider.HORIZONTAL, 20, 50, 20);
+		levelClimber = new JSlider(JSlider.HORIZONTAL, 10, 50, 20);
 		levelClimber.setMajorTickSpacing(5);
 		levelClimber.setPaintTicks(true);
-		lcLabel = new JLabel("Lines Removed Required for level up: 20");
+		lcLabel = new JLabel("Level-up Required Lines: 20");
 		levelClimber.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				lcLabel.setText(String.valueOf("Lines Removed Required for level up: " + levelClimber.getValue()));
+				if (start) {
+					levelClimber.setValue(fixedLC);
+				} else {
+					lcLabel.setText(String.valueOf("Level-up Required Lines: " + levelClimber.getValue()));
+					fixedLC = levelClimber.getValue();
+					tetris.repaint();
+				}
+
 			}
 		});
 
@@ -117,40 +153,65 @@ public class Tetris_3 extends Frame {
 		speedFactor.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				spLabel.setText(String.valueOf("Speed Factor: " + ((float) speedFactor.getValue() / 10)));
+				if (start) {
+					speedFactor.setValue(fixedSpeed);
+				} else {
+					spLabel.setText(String.valueOf("Speed Factor: " + ((float) speedFactor.getValue() / 10)));
+					fixedSpeed = speedFactor.getValue();
+					tetris.repaint();
+				}
+
 			}
 		});
 
-		heightFactor = new JSlider(JSlider.HORIZONTAL, 20, 30, 20);
-		heightFactor.setMajorTickSpacing(2);
+		heightFactor = new JSlider(JSlider.HORIZONTAL, 15, 25, 20);
+		heightFactor.setMajorTickSpacing(1);
 		heightFactor.setPaintTicks(true);
 		heightLabel = new JLabel("Current Hight: 20 squares");
 		heightFactor.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				heightLabel.setText(String.valueOf("Current Hight: " + heightFactor.getValue() + " squares"));
+				if (start) {
+					heightFactor.setValue(fixedHF);
+				} else {
+					heightLabel.setText(String.valueOf("Current Hight: " + heightFactor.getValue() + " squares"));
+					fixedHF = heightFactor.getValue();
+					tetris.repaint();
+				}
+
 			}
 		});
-
-		widthFactor = new JSlider(JSlider.HORIZONTAL, 10, 20, 10);
-		widthFactor.setMajorTickSpacing(2);
+		widthFactor = new JSlider(JSlider.HORIZONTAL, 5, 20, 10);
+		widthFactor.setMajorTickSpacing(1);
 		widthFactor.setPaintTicks(true);
 		widthLabel = new JLabel("Current width: 10 squares");
 		widthFactor.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				widthLabel.setText(String.valueOf("Current width: " + widthFactor.getValue() + " squares"));
+				if (start) {
+					widthFactor.setValue(fixedWF);
+				} else {
+					widthLabel.setText(String.valueOf("Current width: " + widthFactor.getValue() + " squares"));
+					fixedWF = widthFactor.getValue();
+					tetris.repaint();
+				}
+
 			}
 		});
 
-		sizeFactor = new JSlider(JSlider.HORIZONTAL, 10, 15, 10);
+		sizeFactor = new JSlider(JSlider.HORIZONTAL, 10, 14, 10);
 		sizeFactor.setMajorTickSpacing(1);
 		sizeFactor.setPaintTicks(true);
 		sizeLabel = new JLabel("Current size: 1X");
 		sizeFactor.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
+				if (start) {
+					sizeFactor.setValue(fixedSize);
+				}
 				sizeLabel.setText(String.valueOf("Current size: " + (float) sizeFactor.getValue() / 10 + "X"));
+				fixedSize = sizeFactor.getValue();
+				tetris.repaint();
 			}
 		});
 
@@ -167,8 +228,36 @@ public class Tetris_3 extends Frame {
 		panel.add(widthFactor);
 		panel.add(sizeLabel);
 		panel.add(sizeFactor);
+		panel.add(new JLabel("Select the additional shape(s)"));
+		Panel holder = new Panel();
+		for (int i = 1; i < 9; i++) {
+			JCheckBox x = new JCheckBox(String.valueOf(i));
+			int value = i;
+			x.addItemListener(new ItemListener() {
+				@Override
+				public void itemStateChanged(ItemEvent e) {
+					// TODO Auto-generated method stub
+					if (!start) {
+						if (e.getStateChange() == ItemEvent.SELECTED) {
+							pool.add(value + 6);
+						} else {
+							pool.remove(value + 6);
+						}
+						selectPool = new ArrayList<>();
+						for (int j : pool) {
+							selectPool.add(j);
+						}
+					}
+				}
+			});
+
+			holder.add(x);
+		}
+		holder.setMaximumSize(new Dimension(500, 20));
+		holder.setLayout(new BoxLayout(holder, BoxLayout.LINE_AXIS));
+		panel.add(holder);
 		panel.add(startButton);
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 	}
 
 	public static void main(String[] args) {
@@ -183,12 +272,16 @@ public class Tetris_3 extends Frame {
 				System.exit(0);
 			}
 		});
-
-		add(new getTetris3(), BorderLayout.CENTER);
-		add(panel, BorderLayout.EAST);
+		for (int i = 0; i < 7; i++) {
+			pool.add(i);
+			selectPool.add(i);
+		}
+		tetris = new getTetris3();
+		setPanel();
+		add(tetris, BorderLayout.CENTER);
+		add(panel, BorderLayout.WEST);
 		setSize(800, 600);
 		setVisible(true);
-		// setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 	}
 
 	class getTetris3 extends Canvas {
@@ -223,8 +316,8 @@ public class Tetris_3 extends Frame {
 		Point2D[] pol = new Point2D[4];
 
 		// Obtain a number between [0 - 6].
-		int n1 = rand.nextInt(15);
-		int n2 = rand.nextInt(15);
+		int n1 = selectPool.get(rand.nextInt(selectPool.size()));
+		int n2 = selectPool.get(rand.nextInt(selectPool.size()));
 		float delay = 700F, prevDelay = 700F;
 		List<Square> nextCoord = new ArrayList<>();
 		int score = 0, minus = 0, M, N;
@@ -244,7 +337,7 @@ public class Tetris_3 extends Frame {
 				} else if ((coincidence || !newcheckInside()) && !show) {
 					prevDraws.add(new int[] { n1, count, leftMove, rotate });
 					n1 = n2;
-					n2 = rand.nextInt(15);
+					n2 = selectPool.get(rand.nextInt(selectPool.size()));
 					count = 0;
 					leftMove = 0;
 					rotate = 0;
@@ -263,14 +356,14 @@ public class Tetris_3 extends Frame {
 			xCenter = maxX / 2;
 			yCenter = maxY / 2;
 
-			M = scoringFactor.getValue();
-			N = levelClimber.getValue();
-			S = ((float) speedFactor.getValue() / 10);
-
-			width = widthFactor.getValue();
-			height = heightFactor.getValue();
-			size = sizeFactor.getValue();
-
+			if (!start) {
+				M = scoringFactor.getValue();
+				N = levelClimber.getValue();
+				S = ((float) speedFactor.getValue() / 10);
+				width = widthFactor.getValue();
+				height = heightFactor.getValue();
+				size = sizeFactor.getValue();
+			}
 		}
 
 		int iX(float x) {
@@ -291,17 +384,15 @@ public class Tetris_3 extends Frame {
 
 		getTetris3() {
 			// add the MouseListener to get the function of the QUIT function
-			setPanel();
-
 			addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent event) {
-					if (event.getButton() == MouseEvent.BUTTON1 && show == false) {
+					if (event.getButton() == MouseEvent.BUTTON1 && show == false && start) {
 						checkValid(n1, xDraw - square, yDraw, rotate);
 						if (!newcheckCoincidence(nextCoord, prevs) && newcheckInside()) {
 							leftMove++;
 							repaint();
 						}
-					} else if (event.getButton() == MouseEvent.BUTTON3 && show == false) {
+					} else if (event.getButton() == MouseEvent.BUTTON3 && show == false && start) {
 						checkValid(n1, xDraw + square, yDraw, rotate);
 						if (!newcheckCoincidence(nextCoord, prevs) && newcheckInside()) {
 							leftMove--;
@@ -331,13 +422,13 @@ public class Tetris_3 extends Frame {
 				public void mouseWheelMoved(MouseWheelEvent event) {
 					if (event.getWheelRotation() < 0 && !show) {
 						checkValid(n1, xDraw, yDraw, (rotate + 1) % 4);
-						if (!newcheckCoincidence(nextCoord, prevs) && newcheckInside()) {
+						if (!newcheckCoincidence(nextCoord, prevs) && newcheckInside() && start) {
 							rotate = (rotate + 1) % 4;
 							repaint();
 						}
 					} else if (event.getWheelRotation() > 0 && !show) {
 						checkValid(n1, xDraw, yDraw, (rotate - 1) % 4);
-						if (!newcheckCoincidence(nextCoord, prevs) && newcheckInside()) {
+						if (!newcheckCoincidence(nextCoord, prevs) && newcheckInside() && start) {
 							rotate = (rotate - 1) % 4;
 							repaint();
 						}
@@ -368,12 +459,12 @@ public class Tetris_3 extends Frame {
 						}
 						if (!inside) {
 							stillIn = false;
-						} else if (inside && !stillIn) {
-							int n3 = rand.nextInt(15);
+						} else if (inside && !stillIn && start) {
+							int n3 = selectPool.get(rand.nextInt(selectPool.size()));
 							rotate = 0;
 							checkValid(n3, xDraw, yDraw - square, rotate);
 							while (n3 == n1 || n3 == n2 || newcheckCoincidence(nextCoord, prevs) || !newcheckInside()) {
-								n3 = rand.nextInt(10);
+								n3 = selectPool.get(rand.nextInt(selectPool.size()));
 								checkValid(n3, xDraw, yDraw - square, rotate);
 							}
 							n1 = n3;
@@ -403,7 +494,9 @@ public class Tetris_3 extends Frame {
 		}
 
 		public void paint(Graphics g) {
-			timer.start();
+			if (start) {
+				timer.start();
+			}
 			initgr();
 			prevs = new HashSet<>();
 			square = (float) (minMaxXY / (40 - size)); // customarily set the length to be the minMaxXY /
@@ -447,6 +540,22 @@ public class Tetris_3 extends Frame {
 			g.drawRect(iX(xB), iY(yB), (int) (square * 5), (int) (square * 3));
 			g.drawRect(iX(xK), iY(yK), (int) (square * 4), (int) (square * (float) 1.5));
 
+			Font f = new Font("Dialog", Font.BOLD, (int) square);
+			g.setFont(f);
+			float x = square, y = yCenter - 11 * square;
+			for (int i = 1; i < 9; i++) {
+				g.drawString(String.valueOf(i), iX(x), iY(y));
+				drawMoveShapes(g, i + 6, x, y - 2 * square, 0);
+				if (i == 2 || i == 3) {
+					x += 4 * square;
+				} else if (i == 4) {
+					x += 2 * square;
+				} else {
+					x += 3 * square;
+				}
+
+			}
+
 			// draw the previous staying shapes
 			for (int[] info : prevDraws) {
 				int n = info[0];
@@ -471,6 +580,7 @@ public class Tetris_3 extends Frame {
 			if (level > previousLevel) {
 				delay /= (1 + level * S);
 				previousLevel = level;
+				prevDelay = delay;
 				timer.setDelay((int) delay);
 			}
 
@@ -484,18 +594,14 @@ public class Tetris_3 extends Frame {
 			drawMoveShapes(g, n1, xDraw, yDraw, rotate);
 
 			// draw the strings
-			Font f = new Font("Dialog", Font.BOLD, (int) square);
-
 			g.setFont(f);
 			g.drawString("Level:      " + String.valueOf(level), iX(xH), iY(yH));
 			g.drawString("Lines:      " + String.valueOf(removedRows), iX(xI), iY(yI));
 			g.drawString("QUIT", iX(xL), iY(yL));
 
-			f = new Font("Dialog", Font.BOLD, (int) (square));
-
 			g.setFont(f);
 			g.drawString("Score:      " + String.valueOf(score), iX(xJ), iY(yJ));
-
+			g.drawString("All Changes Will Be IGNORED After Game Starts!!!", 0, iY((yA + square)));
 			// draw the pause button, determined by the value of show
 			if (show) {
 				g.setColor(Color.BLUE);
@@ -544,7 +650,7 @@ public class Tetris_3 extends Frame {
 			}
 		}
 
-		void drawStableShapes(Graphics g, int n2) {
+		public void drawStableShapes(Graphics g, int n2) {
 			if (n2 == 0) {
 				nextYellowWedge(iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
 			} else if (n2 == 1) {
@@ -831,7 +937,7 @@ public class Tetris_3 extends Frame {
 			}
 		}
 
-		void nextGrayTri(int x, int y, int square, int rotate) {
+		public void nextGrayTri(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
 			if (rotate == 0) {
 				nextCoord.add(new Square(x, y, Color.GRAY));
@@ -856,7 +962,7 @@ public class Tetris_3 extends Frame {
 			}
 		}
 
-		void nextGrassTri(int x, int y, int square, int rotate) {
+		public void nextGrassTri(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
 			if (rotate == 0) {
 				nextCoord.add(new Square(x + square, y, new Color(0xb7, 0xe1, 0xa1)));
@@ -881,7 +987,7 @@ public class Tetris_3 extends Frame {
 			}
 		}
 
-		void nextPinkTri(int x, int y, int square, int rotate) {
+		public void nextPinkTri(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
 			if (rotate == 0 || rotate == 2 || rotate == -2) {
 				nextCoord.add(new Square(x, y, Color.PINK));
@@ -895,7 +1001,7 @@ public class Tetris_3 extends Frame {
 			}
 		}
 
-		void nextOyellowBi(int x, int y, int square, int rotate) {
+		public void nextOyellowBi(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
 			if (rotate == 0 || rotate == 2 || rotate == -2) {
 				nextCoord.add(new Square(x, y, new Color(0xfd, 0xb9, 0x15)));
@@ -906,7 +1012,7 @@ public class Tetris_3 extends Frame {
 			}
 		}
 
-		void nextLightGrayBi(int x, int y, int square, int rotate) {
+		public void nextLightGrayBi(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
 			if (rotate == 0 || rotate == 2 || rotate == -2) {
 				nextCoord.add(new Square(x, y, Color.LIGHT_GRAY));
@@ -917,7 +1023,7 @@ public class Tetris_3 extends Frame {
 			}
 		}
 
-		void nextCoolGrayTri(int x, int y, int square, int rotate) {
+		public void nextCoolGrayTri(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
 			if (rotate == 0) {
 				nextCoord.add(new Square(x, y, new Color(0x95, 0xa3, 0xa6)));
@@ -938,12 +1044,12 @@ public class Tetris_3 extends Frame {
 			}
 		}
 
-		void nextDeepSeaBlueSingular(int x, int y, int square, int rotate) {
+		public void nextDeepSeaBlueSingular(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
 			nextCoord.add(new Square(x, y, new Color(0x01, 0x54, 0x82)));
 		}
 
-		void nextWarmBlueTri(int x, int y, int square, int rotate) {
+		public void nextWarmBlueTri(int x, int y, int square, int rotate) {
 			nextCoord = new ArrayList<>();
 			if (rotate == 0 || rotate == 2 || rotate == -2) {
 				nextCoord.add(new Square(x, y + square, new Color(0x4b, 0x57, 0xdb)));
