@@ -198,8 +198,9 @@ public class Tetris_3 extends Frame {
 		// to determine the coordinates for each object
 		float xA, yA, xB, yB, xC, yC, xD, yD, xE, yE, xF, yF, xG, yG;
 		float xH, yH, xI, yI, xJ, yJ, xK, yK, xL, yL, xM, yM;
+
 		float xDraw, yDraw;
-		float testYDraw, bottomLine;
+
 		int leftMove = 0;
 		int count = 0;
 		int rotate = 0;
@@ -219,13 +220,13 @@ public class Tetris_3 extends Frame {
 		Point2D[] pol = new Point2D[4];
 
 		// Obtain a number between [0 - 6].
-		int n1 = rand.nextInt(10);
-		int n2 = rand.nextInt(10);
+		int n1 = rand.nextInt(15);
+		int n2 = rand.nextInt(15);
 		float delay = 700F;
 		List<Square> nextCoord = new ArrayList<>();
 		int score = 0, minus = 0, M, N;
 		int level = 1, previousLevel = 1;
-		int removedRows = 0;
+		int removedRows = 0, prevRemovedRows = 0;
 		float S;
 
 		Timer timer = new Timer((int) delay, new ActionListener() {
@@ -240,7 +241,7 @@ public class Tetris_3 extends Frame {
 				} else if ((coincidence || !newcheckInside()) && !show) {
 					prevDraws.add(new int[] { n1, count, leftMove, rotate });
 					n1 = n2;
-					n2 = rand.nextInt(10);
+					n2 = rand.nextInt(15);
 					count = 0;
 					leftMove = 0;
 					rotate = 0;
@@ -255,14 +256,18 @@ public class Tetris_3 extends Frame {
 			maxX = d.width - 1;
 			maxY = d.height - 1;
 			minMaxXY = Math.min(maxX, maxY);
+
 			xCenter = maxX / 2;
 			yCenter = maxY / 2;
+
 			M = scoringFactor.getValue();
 			N = levelClimber.getValue();
 			S = ((float) speedFactor.getValue() / 10);
+
 			width = widthFactor.getValue();
 			height = heightFactor.getValue();
 			size = sizeFactor.getValue();
+
 		}
 
 		int iX(float x) {
@@ -284,6 +289,7 @@ public class Tetris_3 extends Frame {
 		getTetris3() {
 			// add the MouseListener to get the function of the QUIT function
 			setPanel();
+
 			addMouseListener(new MouseAdapter() {
 				public void mousePressed(MouseEvent event) {
 					mouse1x = event.getX();
@@ -312,7 +318,7 @@ public class Tetris_3 extends Frame {
 						boolean coincidence = newcheckCoincidence(nextCoord, prevs);
 						while (!coincidence && newcheckInside()) {
 							count++;
-							checkValid(n1, xDraw, yDraw - (count + 1) * square, rotate);
+							checkValid(n1, xDraw, yDraw - (count + 2) * square, rotate);
 							coincidence = newcheckCoincidence(nextCoord, prevs);
 						}
 					}
@@ -340,6 +346,7 @@ public class Tetris_3 extends Frame {
 			// use the mouseMotionListener to implement the function to show the PAUSE
 			// button
 			addMouseMotionListener(new MouseAdapter() {
+
 				public void mouseMoved(MouseEvent event) {
 
 					mouse2x = event.getX();
@@ -360,7 +367,7 @@ public class Tetris_3 extends Frame {
 						if (!inside) {
 							stillIn = false;
 						} else if (inside && !stillIn) {
-							int n3 = rand.nextInt(10);
+							int n3 = rand.nextInt(15);
 							rotate = 0;
 							checkValid(n3, xDraw, yDraw - square, rotate);
 							while (n3 == n1 || n3 == n2 || newcheckCoincidence(nextCoord, prevs) || !newcheckInside()) {
@@ -368,7 +375,7 @@ public class Tetris_3 extends Frame {
 								checkValid(n3, xDraw, yDraw - square, rotate);
 							}
 							n1 = n3;
-							minus += M * level;
+							score -= M * level;
 							stillIn = true;
 						}
 						repaint();
@@ -383,7 +390,7 @@ public class Tetris_3 extends Frame {
 		boolean insidePolygon(Point2D p, Point2D[] pol) {
 			int n = pol.length, j = n - 1;
 			boolean b = false;
-			float x = p.x, y = p.y;
+			float y = p.y;
 			for (int i = 0; i < n; i++) {
 				if (pol[j].y <= y && y < pol[i].y && Tools2D.area2(pol[j], pol[i], p) > 0
 						|| pol[i].y <= y && y < pol[j].y && Tools2D.area2(pol[i], pol[j], p) > 0)
@@ -401,7 +408,6 @@ public class Tetris_3 extends Frame {
 														// 30
 			removedRows = 0;
 			level = 1;
-			score = 0;
 			// coordinates for the main area
 			xA = xCenter - square * (width - 5);
 			yA = yCenter + square * (height - 10);
@@ -429,7 +435,6 @@ public class Tetris_3 extends Frame {
 			yK = (float) yCenter - square * (float) 8.5;
 			xL = (float) (xK + 0.9 * square);
 			yL = (float) (yK - 1.1 * square);
-			bottomLine = yCenter - 9 * square;
 
 			// coordinates for the draw place
 			xDraw = xCenter - leftMove * square;
@@ -447,17 +452,19 @@ public class Tetris_3 extends Frame {
 				int oldLeftMove = info[2];
 				int oldRotate = info[3];
 				checkValid(n, xCenter - oldLeftMove * square, yCenter + (9 - oldCount) * square, oldRotate);
-				newLeaveMarks(n);
+				storePrevSquares();
 				checkErase();
 			}
+
 			for (int i = 1; i <= removedRows; i++) {
-				score += level * M;
+				if (i > prevRemovedRows) {
+					score += level * M;
+					prevRemovedRows = i;
+				}
 				if (i % N == 0) {
 					level++;
 				}
 			}
-
-			score -= minus;
 			if (level > previousLevel) {
 				delay /= (1 + level * S);
 				previousLevel = level;
@@ -474,11 +481,14 @@ public class Tetris_3 extends Frame {
 
 			// draw the strings
 			Font f = new Font("Dialog", Font.BOLD, (int) square);
+
 			g.setFont(f);
 			g.drawString("Level:      " + String.valueOf(level), iX(xH), iY(yH));
 			g.drawString("Lines:      " + String.valueOf(removedRows), iX(xI), iY(yI));
 			g.drawString("QUIT", iX(xL), iY(yL));
+
 			f = new Font("Dialog", Font.BOLD, (int) (square));
+
 			g.setFont(f);
 			g.drawString("Score:      " + String.valueOf(score), iX(xJ), iY(yJ));
 
@@ -515,16 +525,78 @@ public class Tetris_3 extends Frame {
 				nextGrayTri(iX(xDraw - square), iY(yDraw), (int) square, rotate);
 			} else if (n1 == 8) {
 				nextGrassTri(iX(xDraw - square), iY(yDraw), (int) square, rotate);
-			} else {
+			} else if (n1 == 9) {
 				nextPinkTri(iX(xDraw - square), iY(yDraw + square), (int) square, rotate);
+			} else if (n1 == 10) {
+				nextOyellowBi(iX(xDraw - square), iY(yDraw), (int) square, rotate);
+			} else if (n1 == 11) {
+				nextLightGrayBi(iX(xDraw), iY(yDraw), (int) square, rotate);
+			} else if (n1 == 12) {
+				nextCoolGrayTri(iX(xDraw - square), iY(yDraw), (int) square, rotate);
+			} else if (n1 == 13) {
+				nextDeepSeaBlueSingular(iX(xDraw), iY(yDraw + square), (int) square, rotate);
+			} else {
+				nextWarmBlueTri(iX(xDraw - square), iY(yDraw), (int) square, rotate);
 			}
 		}
 
+		void drawStableShapes(Graphics g, int n2) {
+			if (n2 == 0) {
+				nextYellowWedge(iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
+			} else if (n2 == 1) {
+				nextPurpleReverseWedge(iX(xB + 2F * square), iY(yB - 1.5F * square), (int) square, 0);
+			} else if (n2 == 2) {
+				nextBlueReverseL(iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
+			} else if (n2 == 3) {
+				nextRedReverseL(iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
+			} else if (n2 == 4) {
+				nextGreenCube(iX(xB + 1.5F * square), iY(yB - 1.5F * square), (int) square, 0);
+			} else if (n2 == 5) {
+				nextOrangeHill(iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
+			} else if (n2 == 6) {
+				nextCyanBar(iX(xB + 0.5F * square), iY(yB - square), (int) square, 0);
+			} else if (n2 == 7) {
+				nextGrayTri(iX(xB + 1.5F * square), iY(yB - 1.5F * square), (int) square, 0);
+			} else if (n2 == 8) {
+				nextGrassTri(iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
+			} else if (n2 == 9) {
+				nextPinkTri(iX(xB + square), iY(yB - square), (int) square, 0);
+			} else if (n2 == 10) {
+				nextOyellowBi(iX(xB + 1.5F * square), iY(yB - 1.5F * square), (int) square, 0);
+			} else if (n2 == 11) {
+				nextLightGrayBi(iX(xB + 2 * square), iY(yB - 1.5F * square), (int) square, 0);
+			} else if (n2 == 12) {
+				nextCoolGrayTri(iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
+			} else if (n2 == 13) {
+				nextDeepSeaBlueSingular(iX(xB + 2 * square), iY(yB - square), (int) square, 0);
+			} else {
+				nextWarmBlueTri(iX(xB + square), iY(yB - square), (int) square, 0);
+			}
+			for (Square i : nextCoord) {
+				drawSquare(g, i);
+			}
+		}
+
+		// function to draw the current moving shape
+		void drawMoveShapes(Graphics g, int n1, float xDraw, float yDraw, int rotate) {
+			checkValid(n1, xDraw, yDraw, rotate);
+			for (Square i : nextCoord) {
+				drawSquare(g, i);
+			}
+		}
+
+		// function to draw the next shape in the fixed next shape box
+
 		// function to store the coordinates of previous fixed drawn squares
 
-		void newLeaveMarks(int n) {
+		void storePrevSquares() {
+			int min = Integer.MAX_VALUE;
 			for (Square vertex : nextCoord) {
 				prevs.add(new Square(vertex.X, vertex.Y, vertex.color));
+				min = Math.min(min, vertex.Y);
+			}
+			if (min <= yCenter - (int) square * (height - 10)) {
+				System.exit(0);
 			}
 		}
 
@@ -559,42 +631,6 @@ public class Tetris_3 extends Frame {
 			}
 		}
 
-		// function to draw the current moving shape
-		void drawMoveShapes(Graphics g, int n1, float xDraw, float yDraw, int rotate) {
-			checkValid(n1, xDraw, yDraw, rotate);
-			for (Square i : nextCoord) {
-				drawSquare(g, i);
-			}
-		}
-
-		// function to draw the next shape in the fixed next shape box
-		void drawStableShapes(Graphics g, int n2) {
-			if (n2 == 0) {
-				nextYellowWedge(iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
-			} else if (n2 == 1) {
-				nextPurpleReverseWedge(iX(xB + 2F * square), iY(yB - 1.5F * square), (int) square, 0);
-			} else if (n2 == 2) {
-				nextBlueReverseL(iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
-			} else if (n2 == 3) {
-				nextRedReverseL(iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
-			} else if (n2 == 4) {
-				nextGreenCube(iX(xB + 1.5F * square), iY(yB - 1.5F * square), (int) square, 0);
-			} else if (n2 == 5) {
-				nextOrangeHill(iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
-			} else if (n2 == 6) {
-				nextCyanBar(iX(xB + 0.5F * square), iY(yB - square), (int) square, 0);
-			} else if (n2 == 7) {
-				nextGrayTri(iX(xB + 1.5F * square), iY(yB - 1.5F * square), (int) square, 0);
-			} else if (n2 == 8) {
-				nextGrassTri(iX(xB + square), iY(yB - 1.5F * square), (int) square, 0);
-			} else {
-				nextPinkTri(iX(xB + square), iY(yB - square), (int) square, 0);
-			}
-			for (Square i : nextCoord) {
-				drawSquare(g, i);
-			}
-		}
-
 		// function to detect if the collision occurs
 
 		boolean newcheckCoincidence(List<Square> vertices, Set<Square> prevs) {
@@ -621,30 +657,6 @@ public class Tetris_3 extends Frame {
 						&& y + (int) square <= yCenter + (int) square * 10);
 			}
 			return isInside;
-		}
-
-		Color getColor(int n) {
-			if (n == 0) {
-				return Color.YELLOW;
-			} else if (n == 1) {
-				return Color.MAGENTA;
-			} else if (n == 2) {
-				return Color.BLUE;
-			} else if (n == 3) {
-				return Color.RED;
-			} else if (n == 4) {
-				return Color.GREEN;
-			} else if (n == 5) {
-				return Color.ORANGE;
-			} else if (n == 6) {
-				return Color.CYAN;
-			} else if (n == 7) {
-				return Color.GRAY;
-			} else if (n == 8) {
-				return new Color(0xb7, 0xe1, 0xa1);
-			} else {
-				return Color.PINK;
-			}
 		}
 
 		void fillPoly(int X, int Y) {
@@ -676,7 +688,6 @@ public class Tetris_3 extends Frame {
 				nextCoord.add(new Square(x + square, y, Color.YELLOW));
 				nextCoord.add(new Square(x + square, y - square, Color.YELLOW));
 				nextCoord.add(new Square(x + 2 * square, y - square, Color.YELLOW));
-
 			} else if (rotate == 1 || rotate == 3 || rotate == -3 || rotate == -1) {
 				nextCoord.add(new Square(x + square, y, Color.YELLOW));
 				nextCoord.add(new Square(x + square, y - square, Color.YELLOW));
@@ -694,7 +705,7 @@ public class Tetris_3 extends Frame {
 				nextCoord.add(new Square(x, y - square, Color.MAGENTA));
 				nextCoord.add(new Square(x - square, y - square, Color.MAGENTA));
 
-			} else if (rotate == 1 || rotate == 3 || rotate == -3 || rotate == -1) {
+			} else {
 				nextCoord.add(new Square(x, y, Color.MAGENTA));
 				nextCoord.add(new Square(x, y - square, Color.MAGENTA));
 				nextCoord.add(new Square(x + square, y - square, Color.MAGENTA));
@@ -877,8 +888,69 @@ public class Tetris_3 extends Frame {
 				nextCoord.add(new Square(x + square, y, Color.PINK));
 				nextCoord.add(new Square(x + square, y + square, Color.PINK));
 				nextCoord.add(new Square(x + square, y - square, Color.PINK));
-
 			}
 		}
+
+		void nextOyellowBi(int x, int y, int square, int rotate) {
+			nextCoord = new ArrayList<>();
+			if (rotate == 0 || rotate == 2 || rotate == -2) {
+				nextCoord.add(new Square(x, y, new Color(0xfd, 0xb9, 0x15)));
+				nextCoord.add(new Square(x + square, y - square, new Color(0xfd, 0xb9, 0x15)));
+			} else {
+				nextCoord.add(new Square(x + square, y, new Color(0xfd, 0xb9, 0x15)));
+				nextCoord.add(new Square(x, y - square, new Color(0xfd, 0xb9, 0x15)));
+			}
+		}
+
+		void nextLightGrayBi(int x, int y, int square, int rotate) {
+			nextCoord = new ArrayList<>();
+			if (rotate == 0 || rotate == 2 || rotate == -2) {
+				nextCoord.add(new Square(x, y, Color.LIGHT_GRAY));
+				nextCoord.add(new Square(x, y - square, Color.LIGHT_GRAY));
+			} else {
+				nextCoord.add(new Square(x, y + square, Color.LIGHT_GRAY));
+				nextCoord.add(new Square(x + square, y + square, Color.LIGHT_GRAY));
+			}
+		}
+
+		void nextCoolGrayTri(int x, int y, int square, int rotate) {
+			nextCoord = new ArrayList<>();
+			if (rotate == 0) {
+				nextCoord.add(new Square(x, y, new Color(0x95, 0xa3, 0xa6)));
+				nextCoord.add(new Square(x + square, y - square, new Color(0x95, 0xa3, 0xa6)));
+				nextCoord.add(new Square(x + 2 * square, y, new Color(0x95, 0xa3, 0xa6)));
+			} else if (rotate == 1 || rotate == -3) {
+				nextCoord.add(new Square(x, y + square, new Color(0x95, 0xa3, 0xa6)));
+				nextCoord.add(new Square(x + square, y, new Color(0x95, 0xa3, 0xa6)));
+				nextCoord.add(new Square(x, y - square, new Color(0x95, 0xa3, 0xa6)));
+			} else if (rotate == 2 || rotate == -2) {
+				nextCoord.add(new Square(x + square, y, new Color(0x95, 0xa3, 0xa6)));
+				nextCoord.add(new Square(x, y - square, new Color(0x95, 0xa3, 0xa6)));
+				nextCoord.add(new Square(x + 2 * square, y - square, new Color(0x95, 0xa3, 0xa6)));
+			} else {
+				nextCoord.add(new Square(x, y, new Color(0x95, 0xa3, 0xa6)));
+				nextCoord.add(new Square(x + square, y + square, new Color(0x95, 0xa3, 0xa6)));
+				nextCoord.add(new Square(x + square, y - square, new Color(0x95, 0xa3, 0xa6)));
+			}
+		}
+
+		void nextDeepSeaBlueSingular(int x, int y, int square, int rotate) {
+			nextCoord = new ArrayList<>();
+			nextCoord.add(new Square(x, y, new Color(0x01, 0x54, 0x82)));
+		}
+
+		void nextWarmBlueTri(int x, int y, int square, int rotate) {
+			nextCoord = new ArrayList<>();
+			if (rotate == 0 || rotate == 2 || rotate == -2) {
+				nextCoord.add(new Square(x, y + square, new Color(0x4b, 0x57, 0xdb)));
+				nextCoord.add(new Square(x + square, y, new Color(0x4b, 0x57, 0xdb)));
+				nextCoord.add(new Square(x + 2 * square, y - square, new Color(0x4b, 0x57, 0xdb)));
+			} else {
+				nextCoord.add(new Square(x, y - square, new Color(0x4b, 0x57, 0xdb)));
+				nextCoord.add(new Square(x + square, y, new Color(0x4b, 0x57, 0xdb)));
+				nextCoord.add(new Square(x + 2 * square, y + square, new Color(0x4b, 0x57, 0xdb)));
+			}
+		}
+
 	}
 }
