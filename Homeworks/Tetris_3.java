@@ -19,6 +19,7 @@ import java.awt.event.WindowEvent;
 import java.util.*;
 
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -82,10 +83,11 @@ public class Tetris_3 extends Frame {
 	JSlider sizeFactor;
 	JLabel sizeLabel;
 
+	JButton startButton;
 	Panel panel;
 
 	public void setPanel() {
-
+		startButton = new JButton("Start the Game After Setup");
 		scoringFactor = new JSlider(JSlider.HORIZONTAL, 1, 10, 1);
 		scoringFactor.setMajorTickSpacing(1);
 		scoringFactor.setPaintTicks(true);
@@ -165,6 +167,7 @@ public class Tetris_3 extends Frame {
 		panel.add(widthFactor);
 		panel.add(sizeLabel);
 		panel.add(sizeFactor);
+		panel.add(startButton);
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 	}
 
@@ -222,7 +225,7 @@ public class Tetris_3 extends Frame {
 		// Obtain a number between [0 - 6].
 		int n1 = rand.nextInt(15);
 		int n2 = rand.nextInt(15);
-		float delay = 700F;
+		float delay = 700F, prevDelay = 700F;
 		List<Square> nextCoord = new ArrayList<>();
 		int score = 0, minus = 0, M, N;
 		int level = 1, previousLevel = 1;
@@ -291,15 +294,6 @@ public class Tetris_3 extends Frame {
 			setPanel();
 
 			addMouseListener(new MouseAdapter() {
-				public void mousePressed(MouseEvent event) {
-					mouse1x = event.getX();
-					mouse1y = event.getY();
-					if ((mouse1x < iX(xK + square * 4)) && (mouse1x > iX(xK))
-							&& (mouse1y < iY(yK - square * (float) 1.5)) && (mouse1y > iY(yK))) {
-						System.exit(0);
-					}
-				}
-
 				public void mouseClicked(MouseEvent event) {
 					if (event.getButton() == MouseEvent.BUTTON1 && show == false) {
 						checkValid(n1, xDraw - square, yDraw, rotate);
@@ -313,15 +307,23 @@ public class Tetris_3 extends Frame {
 							leftMove--;
 							repaint();
 						}
-					} else if (event.getButton() == MouseEvent.BUTTON2 && show == false) {
-						checkValid(n1, xDraw, yDraw - square, rotate);
-						boolean coincidence = newcheckCoincidence(nextCoord, prevs);
-						while (!coincidence && newcheckInside()) {
-							count++;
-							checkValid(n1, xDraw, yDraw - (count + 2) * square, rotate);
-							coincidence = newcheckCoincidence(nextCoord, prevs);
-						}
 					}
+				}
+
+				public void mousePressed(MouseEvent event) {
+					mouse1x = event.getX();
+					mouse1y = event.getY();
+					if ((mouse1x < iX(xK + square * 4)) && (mouse1x > iX(xK))
+							&& (mouse1y < iY(yK - square * (float) 1.5)) && (mouse1y > iY(yK))) {
+						System.exit(0);
+					} else if (event.getButton() == MouseEvent.BUTTON2 && show == false) {
+						prevDelay = timer.getDelay();
+						timer.setDelay(50);
+					}
+				}
+
+				public void mouseReleased(MouseEvent event) {
+					timer.setDelay((int) prevDelay);
 				}
 			});
 
@@ -437,8 +439,8 @@ public class Tetris_3 extends Frame {
 			yL = (float) (yK - 1.1 * square);
 
 			// coordinates for the draw place
-			xDraw = xCenter - leftMove * square;
-			yDraw = yCenter + (9 - count) * square;
+			xDraw = xCenter - ((width - 10) / 2 + leftMove) * square;
+			yDraw = yCenter + (height - 11 - count) * square;
 
 			// draw all the necessary rectangles
 			g.drawRect(iX(xA), iY(yA), (int) (square * width), (int) (square * height));
@@ -451,7 +453,8 @@ public class Tetris_3 extends Frame {
 				int oldCount = info[1];
 				int oldLeftMove = info[2];
 				int oldRotate = info[3];
-				checkValid(n, xCenter - oldLeftMove * square, yCenter + (9 - oldCount) * square, oldRotate);
+				checkValid(n, xCenter - ((width - 10) / 2 + oldLeftMove) * square,
+						yCenter + (height - 11 - oldCount) * square, oldRotate);
 				storePrevSquares();
 				checkErase();
 			}
@@ -468,8 +471,9 @@ public class Tetris_3 extends Frame {
 			if (level > previousLevel) {
 				delay /= (1 + level * S);
 				previousLevel = level;
+				timer.setDelay((int) delay);
 			}
-			timer.setDelay((int) delay);
+
 			for (Square square : prevs) {
 				drawSquare(g, square);
 			}
@@ -951,6 +955,5 @@ public class Tetris_3 extends Frame {
 				nextCoord.add(new Square(x + 2 * square, y + square, new Color(0x4b, 0x57, 0xdb)));
 			}
 		}
-
 	}
 }
