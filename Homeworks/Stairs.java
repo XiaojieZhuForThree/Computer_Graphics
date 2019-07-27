@@ -102,7 +102,7 @@ class Stair {
 		for (int w = 0; w < nn - 1; w++) {
 			fw.write((count + w + 20) + " ");
 		}
-		fw.write(" " + (count + 39) + ".\r\n");
+		fw.write((count + 39) + ".\r\n");
 		fw.close();
 	}
 
