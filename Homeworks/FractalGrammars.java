@@ -116,7 +116,7 @@ class CvFractalGrammars extends Canvas {
 
 	public void turtleGraphics(Graphics g, String instruction, int depth, double len) {
 		double xMark = 0, yMark = 0, dirMark = 0;
-		minLen = Math.min(minLen, maxY / (50 * level));
+		minLen = Math.min(minLen, len / 5);
 		for (int i = 0; i < instruction.length(); i++) {
 			char ch = instruction.charAt(i);
 			switch (ch) {
