@@ -126,9 +126,9 @@ class CvFractalGrammars extends Canvas {
 					double val = len;
 					if ((i + 1 < instruction.length()
 							&& (instruction.charAt(i + 1) == '+' || instruction.charAt(i + 1) == '-')))
-						val -= maxY/100;
+						val -= maxY / 80;
 					if ((i - 1 >= 0 && (instruction.charAt(i - 1) == '+' || instruction.charAt(i - 1) == '-')))
-						val -= maxY/100;
+						val -= maxY / 80;
 					double rad = Math.PI / 180 * dir, // Degrees -> radians
 							dx = (val) * Math.cos(rad), dy = (val) * Math.sin(rad);
 					drawTo(g, xLast + dx, yLast + dy);
@@ -158,8 +158,8 @@ class CvFractalGrammars extends Canvas {
 				for (int m = 0; m < rotation; m++) {
 					dir -= 1;
 					double rad = Math.PI / 180 * dir, // Degrees -> radians
-							dx = ((maxY/50) * Math.sqrt(2)) * Math.cos(rad) / (rotation),
-							dy = ((maxY/50) * Math.sqrt(2)) * Math.sin(rad) / (rotation);
+							dx = ((maxY * Math.PI / 160)) * Math.cos(rad) / (rotation),
+							dy = ((maxY * Math.PI / 160)) * Math.sin(rad) / (rotation);
 					drawTo(g, xLast + dx, yLast + dy);
 				}
 				// dir -= rotation;
@@ -170,8 +170,8 @@ class CvFractalGrammars extends Canvas {
 				for (int m = 0; m < rotation; m++) {
 					dir += 1;
 					double rad = Math.PI / 180 * dir, // Degrees -> radians
-							dx = ((maxY/50) * Math.sqrt(2)) * Math.cos(rad) / rotation,
-							dy = ((maxY/50) * Math.sqrt(2)) * Math.sin(rad) / rotation;
+							dx = ((maxY * Math.PI / 160)) * Math.cos(rad) / rotation,
+							dy = ((maxY * Math.PI / 160)) * Math.sin(rad) / rotation;
 					drawTo(g, xLast + dx, yLast + dy);
 				}
 				// dir += rotation;
