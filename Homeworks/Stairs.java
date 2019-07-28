@@ -96,7 +96,7 @@ class Stair {
 
 		for (int t = 0; t < nn - 1; t++) {
 			face(count, t, t + 1, t + 21, t + 20);
-			fw.write((count + t + 20) + " " + (count + t + 21) + ".\r\n");
+			// fw.write((count + t + 20) + " " + (count + t + 21) + ".\r\n");
 		}
 		face(count, 19, 0, 20, 39);
 		for (int w = 0; w < nn - 1; w++) {
