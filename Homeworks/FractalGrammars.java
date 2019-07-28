@@ -116,7 +116,7 @@ class CvFractalGrammars extends Canvas {
 
 	public void turtleGraphics(Graphics g, String instruction, int depth, double len) {
 		double xMark = 0, yMark = 0, dirMark = 0;
-		minLen = Math.min(minLen, len);
+		minLen = Math.min(minLen, maxY / (50 * level));
 		for (int i = 0; i < instruction.length(); i++) {
 			char ch = instruction.charAt(i);
 			switch (ch) {
@@ -126,9 +126,9 @@ class CvFractalGrammars extends Canvas {
 					double val = len;
 					if ((i + 1 < instruction.length()
 							&& (instruction.charAt(i + 1) == '+' || instruction.charAt(i + 1) == '-')))
-						val -= maxY / 80;
+						val -= minLen;
 					if ((i - 1 >= 0 && (instruction.charAt(i - 1) == '+' || instruction.charAt(i - 1) == '-')))
-						val -= maxY / 80;
+						val -= minLen;
 					double rad = Math.PI / 180 * dir, // Degrees -> radians
 							dx = (val) * Math.cos(rad), dy = (val) * Math.sin(rad);
 					drawTo(g, xLast + dx, yLast + dy);
@@ -158,8 +158,8 @@ class CvFractalGrammars extends Canvas {
 				for (int m = 0; m < rotation; m++) {
 					dir -= 1;
 					double rad = Math.PI / 180 * dir, // Degrees -> radians
-							dx = ((maxY * Math.PI / 160)) * Math.cos(rad) / (rotation),
-							dy = ((maxY * Math.PI / 160)) * Math.sin(rad) / (rotation);
+							dx = ((minLen * Math.PI)) * Math.cos(rad) / (rotation),
+							dy = ((minLen * Math.PI)) * Math.sin(rad) / (rotation);
 					drawTo(g, xLast + dx, yLast + dy);
 				}
 				// dir -= rotation;
@@ -170,8 +170,8 @@ class CvFractalGrammars extends Canvas {
 				for (int m = 0; m < rotation; m++) {
 					dir += 1;
 					double rad = Math.PI / 180 * dir, // Degrees -> radians
-							dx = ((maxY * Math.PI / 160)) * Math.cos(rad) / rotation,
-							dy = ((maxY * Math.PI / 160)) * Math.sin(rad) / rotation;
+							dx = ((minLen * Math.PI)) * Math.cos(rad) / rotation,
+							dy = ((minLen * Math.PI)) * Math.sin(rad) / rotation;
 					drawTo(g, xLast + dx, yLast + dy);
 				}
 				// dir += rotation;
